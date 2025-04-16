@@ -1,0 +1,2624 @@
+- creating the data manually
+	- from sklearn.datasets import make_classification, make_regression, make_blobs, make_moons, make_circles, make_gaussian_quantiles
+	- X, y = make_classification(n_samples=800, n_features=10, n_classes=2, n_informative=7, n_redundant=3)
+	- X, Y = make_regression(n_samples=1000, n_features=10, n_informative=5, n_targets=1, random_state=0)
+	- X, y = make_moons(200, noise=0.20) #create datasets of 200 examples with 2 classes
+	- X, y = make_blobs(n_samples=100, centers=2, n_features=3, random_state=1)
+	- centers = [[-5, 2], [-2, -2], [1, 2], [5, -2]] #clusters with x1,x2 coords
+	  X, y = make_blobs(n_samples=2000, centers=centers, cluster_std=1.0, random_state=30) #4 clusters for y, x with 2 features #creates multiclass classification data, cluster_std creates clusters that makes it diffcult for the model to learn - hard examples - which makes model strong
+	- noisy_circles = make_circles(N, factor=0.5, noise=0.3) #circle structure of 2 classes #binary classification data, only 2 classes
+	- gaussian_quantiles = make_gaussian_quantiles(mean=None, cov=0.5, n_samples=N, n_features=2, n_classes=2, shuffle=True, random_state=None) #2 classes of mean centered data
+	-  rng = np.random.default_rng(2) #random number generator with seed=2
+	   X = rng.random(400).reshape(-1, 2) #generating random 400 numbers and reshaping to get 2 columns of each 200 rows
+       X[:,1] = X[:,1] * 4 + 11.5   #customization of second col by adding noise (think as x-mu/sigma reverse)
+       X[:,0] = X[:,0] * (285-150) + 150  # customization of first col
+       Y = np.zeros(len(X))
+	   
+	- Generating data using noise 
+	    def generate_data(): #regression data
+			m = 20; sd = 0.7; seed=1;
+			np.random.seed(seed)
+			x_train = np.linspace(0, 49, m) #m=no of training examples
+			b = 0
+			y_ideal = X**2 + b #ideal or true model
+			y_noise = y_ideal + sd * y_ideal * (np.random.sample((m,)) - 0.5) #generating data from ideal model => estimated model (relative multiplicative noise)
+			x_ideal = x_train #for redraw when new data included in X
+			return x_train, y_train, x_ideal, y_ideal
+			
+		def generate_data(): #classification data
+			m = 50
+            n = 2
+            np.random.seed(2)
+            x_train = 2 * (np.random.rand(m, n) - [0.5, 0.5]) #Creating random data with noise
+            y_train = x_train[:, 1] + 0.5 > x_train[:, 0] ** 2 + 0.5 * np.random.rand(m) #quadratic + random
+            y_train = y_train + 0 #making boolean to integer
+            X = x_train
+            y = y_train
+            x_ideal = np.sort(x_train[:, 0])
+            y_ideal = x_ideal ** 2
+			
+	- creating samples of training data of 15 percentage samples
+		m = 50
+		m_range = np.array(m *np.arange(1,16)) #[ 50 100 150 200 250 300 350 400 450 500 550 600 650 700 750] shape-(15,)
+		num_steps = m_range.shape[0] #15
+		for i in range(num_steps):
+			X, y, y_ideal, x_ideal = gen_data(m_range[i], 5, 0.7)
+			
+    - Generating data with noise to simulate real world data as it usually contains noise
+		X = np.linspace(0, 10, 100).reshape(-1, 1) #input feature
+		y = 2 * X + 3 #simple true regression model original y
+		def add_noise(target, noise_type='normal', magnitude=0.5): # Add noise to the target variable y
+			if noise_type == 'normal':
+				noise = np.random.normal(scale=magnitude, size=target.shape) #equal to np.random.normal(size=target.shape) * magnitude
+			elif noise_type == 'uniform':
+				noise = np.random.uniform(-magnitude, magnitude, size=target.shape)
+			else:
+				raise ValueError("Invalid noise_type. Use 'normal' or 'uniform'.")
+			return target + noise
+		y_with_noise = add_noise(y, noise_type='normal', magnitude=0.5) # Add normal noise with sd 0.5
+	
+	- Segmented piecewise-linear data
+		X = np.linspace(0, 3, 3*100) #just to show that we are going to create 3 linear piece functions
+		y = np.r_[-2 * X[0:100] + 2, 1 * X[100:200] -3 + 2, 3 * X[200:300] -7 + 2] #3 segmented piecewise linear true function
+		
+	- Generating not linearly separable Spiral data (classification)
+		N = 100 # number of points per class
+		D = 2 # dimensionality
+		K = 3 # number of classes (three classes (blue, red, yellow) )
+		X = np.zeros((N*K, D)) # data matrix (each row = single example)
+		y = np.zeros(N*K, dtype='uint8') # class labels
+		for j in range(K):
+		  ix = range(N*j, N*(j+1))
+		  r = np.linspace(0.0, 1, N) # radius
+		  t = np.linspace(j*4, (j+1)*4, N) + np.random.randn(N)*0.2 # theta
+		  X[ix] = np.c_[r*np.sin(t), r*np.cos(t)]
+		  y[ix] = j
+		# lets visualize the data:
+		plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.Spectral)
+		plt.show()
+		
+	- planar data (flower data) non linearly separable data from polar coordiantes to cartesian coordinates
+		def load_planar_dataset():
+			np.random.seed(1)
+			m = 400 #no. of examples
+			n = 2 #no. of features - dimensionality
+			classes = 2 # binary classification
+			N = int(m/2) # number of points per class. equally sampled classes
+			X = np.zeros((m, n)) #We first create dataset using the usual shape. 
+			y = np.zeros((m, 1), dtype="uint8") # a column vector cuz each example is a row vector here usually - labels vector (0 for red, 1 for blue)
+			a = 4 # maximum ray of the flower
+			#lets populate the X and y values
+			for j in range(2):
+		        # print(N * j) #1st iteration 0, second iteration 200
+		        # print(N * (j+1)) #200 400
+				idx = range(N*j, N*(j+1)) #1st iteration range(0, 200) second iteration range(200, 400)
+				#polar coordinates
+				t = np.linspace(j*3.12, (j+1)*3.12, N) + np.random.randn(N)*0.2 #theta
+				r = a * np.sin(4 * t) + np.random.randn(N) * 0.2 #radius
+				X[idx] = np.c_[r * np.sin(t), r * np.cos(t)] # cartesian coordinates = r * sin(angle) , r*cos(angle) to get the vectors or points
+				#check mathisfun to understand getting the cartesian coordinates from polar coordindates
+				y[idx] = j
+				
+			# If its DNN, we transpose X and Y when sending to DNN
+			#X = X.T
+			#y = y.T
+			return X, y
+		
+	- df = pd.DataFrame({'a': [7, 1, 5], 'b': ['3','2','1']}, dtype='object')
+	- df = pd.DataFrame({'x1' : x1_arr, 'x2': x2_arr})
+	- df = pd.DataFrame(np.array([1, 2], [3, 4]), dtype='int')
+	- df = pd.DataFrame([[30, 21]], columns=['Apples', 'Bananas'])
+	- df = pd.DataFrame([(0.0, 0.5, -1.0, 1.0),], columns=list('abcd'))
+	- df = pd.DataFrame({"A": ["A8", "A9", "A10", "A11"], "B": ["B8", "B9", "B10", "B11"],}, index=[8, 9],) #rowindex
+	- df = df.join(df_2['col']) #joining df2 column to our df
+	
+	- Merge join and concatenate dframes
+		- frames = [df1, df2, df3] #better use list comprehension to avoid performance hits
+		- concatenated_df = pd.concat(frames) #up down - default axis=0
+		- concatenated_df = pd.concat(frames, axis=1) # right left
+	
+	- df.insert(1, 'colname', coltobeinserteddf) #insert a column into the df at index 1
+	- array = np.random.randint(5) #[1, 2, 8, 5, 6] random array of size 5, =~ np.random.randint(5, size=(5,))
+	- array = np.random.randint(5, size=(1, 5)) #random 2d dimensional array [[1, 2, 8, 5, 6]]
+	- StringIO
+	- pd.Series([30, 35, 40], index=['2015 Sales', '2016 Sales', '2017 Sales'], name='Product A') #name is the overall name but not colname as in df. DataFrame is a table, a Series is a list
+	- df['col'] = 'value' #assigining same value to the entire column
+	- df['col'] = range(len(df), 0, -1) #assigining values start from last index to 0
+	- df.loc[[0, 1, 10, 100], ['col1', 'col2', 'col3', 'col4']] #getting rows 0, 1, 10, 100 from given columns
+	
+	- Creating timeseries data
+		- time= pd.date_range("1/01/2021", periods=10, freq="W")
+		  df = pd.DataFrame(index=time)
+		  df["Units sold"] = np.arange(1, 11)
+		
+		- dates = pd.date_range('2016-01-01', '2016-02-01', freq='s')
+		  df = pd.DataFrame(index=dates, data={'A': 1}) #fills all the rows of colname 'A' to 1
+		  
+	- Creating normal/ guassian distribution synthetically
+		from numpy.random import randn, seed
+		seed(0)
+		x1 = 20 * randn(1000) + 100 #feature x1, 20 is sd, 100 is mean, 1000 is total samples
+		x2 = x1 + (10 * randn(1000) + 50) #feature x2 which is correlated with feature x1
+		#a = np.random.random_sample(4) #creates an array with 4 random float numbers
+		#a = np.random.random_sample((1, 1))  #gived 2d matrix [[randomnumber]]
+		
+    - Generating skewed data sets
+		from scipy.stats import skewnorm
+		import matplotlib.pyplot as plt
+		numValues = 10000
+		maxVal = 100
+		skewness = 20 #Negative values are left skewed, positive values are right skewed
+		random = skewnorm.rvs(a=skewness, loc=maxVal, size=numValues)
+		random = random - min(random) #shift the set so that min value = 0
+		random = random / max(random) #standardize all the values between 0 and 1
+		random = random * maxVal #Multiply the standardized value by the maximum value
+		x = random
+		#plot the histogram to check skewness
+		plt.hist(x, bins=50)
+		plt.hist(X[:, 1], bins=100, label="latency")
+		#transformations to reduce the skewness and make it more gaussian
+		plt.hist(x**0.5, bins=50)
+		plt.hist(np.log(1 + x), bins=50)
+		plt.hist(x**2, bins=50)
+		plt.hist(x**0.3, bins=50)
+		
+-------------------------------------------------------------
+
+- Load the data from csv file, text file, pdf file, pickle file
+	- CSV
+		- import pandas as pd
+		- pd.read_csv(file) -> df
+		- pd.read_csv(fileurl, usecols=['col1','col2','col3'])
+		- pd.read_csv('path', index_col=0) #specifying to use column 0 as index (instead of creating a new one from scratch)
+		- pd.read_csv(fileurl, true_values=['yes'], false_values=['no']) #target values having yes, no will be changed to True, False
+		- pd.read_csv('path', header=0, index_col=0,  delimiter=',', quotechar='"') #user row 0 as header and col 1 as index col, quotechar to escape quotes
+		
+		- import numpy as np
+		  np.genfromtxt("file.csv", dtype=[()], delimiter=",") -> numpy arr
+		  
+		- import csv 
+		  with open('./file.csv', newline='') as csvfile:
+			reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+	
+	- PDF
+		- import PyPDF2
+		- with open("filepath", "rb") as fileobj:
+			- readerobj = PyPDF2.PdfReader(fileobj)
+			- print(readerobj.numPages)
+			- page = readerobj.getPage(0) #getting the first page
+			- page = readerobj.pages[0] #another way of getting the first page
+			- print(page.extract_text()) #extracting the contents
+		
+	- Text
+		- with open("filepath.txt", "r") as fileobj:
+			- print(fileobj.read()) #printing the contents of the file
+			
+		- import csv
+		  with open('./file.txt', newline='') as f:    #csv reader handles quoted strings better
+			item_features = list(csv.reader(f))[0]
+			
+		- data = np.loadtxt("txtfilepath", delimiter=",", skiprows=1)
+		  X = data[:, :2]
+		  y = data[:, 2]
+		  
+		- data = np.genfromtxt("txtfilepath", delimiter=",", usecols=['col1', 'col2'])
+		  X = data[:, :2]
+		  y = data[:, 2]
+		
+	- binary files(.npy files)
+		data = np.load("filepath of .npy files")
+		
+	- file = open('./file.csv', 'rb')
+	  X = np.loadtxt(file, delimiter = ",")
+	  
+	- pickle files
+	  with open('./file.pickle', 'rb') as f:
+        mydata = pickle.load(f)
+	  
+	- h5py files
+		import h5py
+		def load_dataset():
+			train_dataset = h5py.File('datasets/train_catvnoncat.h5', "r")
+			train_set_x_orig = np.array(train_dataset["train_set_x"][:]) # your train set features
+			train_set_y_orig = np.array(train_dataset["train_set_y"][:]) # your train set labels
+			print(list(train_dataset.keys()))
+			#print(train_dataset['anydatasetkey'].shape)
+
+			test_dataset = h5py.File('datasets/test_catvnoncat.h5', "r")
+			test_set_x_orig = np.array(test_dataset["test_set_x"][:]) # your test set features
+			test_set_y_orig = np.array(test_dataset["test_set_y"][:]) # your test set labels
+
+			classes = np.array(test_dataset["list_classes"][:]) # the list of classes
+    
+			train_set_y_orig = train_set_y_orig.reshape((1, train_set_y_orig.shape[0]))
+			test_set_y_orig = test_set_y_orig.reshape((1, test_set_y_orig.shape[0]))
+			return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes
+	
+	- Microsoft Access Table files / MATLAB files (.mat file)
+		import scipy
+		def load_2D_dataset():
+			data = scipy.io.loadmat('filepath/data.mat')
+			train_X = data["X"]
+			train_Y = data["y"]
+			return train_X, train_Y
+			
+	- from sklearn.datasets import load_iris, load_diabetes, load_boston
+	
+-------------------------------------------------------------
+- Settings
+	- np.set_printoptions(precision=3)
+	- np.set_printoptions(linewidth=200, edgeitems=20)
+	- np.printoptions(formatter={"float": "{:.3f}".format})
+	- np.set_printoptions(suppress=True)
+	- with np.printoptions(formatter={"float": "{:.3f}".format}):
+		your operations on your array
+	- np.core.arrayprint._line_width = 180
+	- pd.options.display.max_rows = 9999
+	- pd.set_option('display.max_rows', 5)
+	- df.to_string() #for full display of df
+	- axis=0 represents rows(runs through all the rows), axis=1 represents co'l'umns
+	- import warnings
+	- warnings.filterwarnings('ignore')
+	- np.random.seed(0)
+	- tf.autograph.set_verbosity(0)
+	- tf.get_logger().setLevel("ERROR")
+	- tf.keras.backend.set_floatx('float64')
+	- tf.random.set_seed(1234) # applied to achieve consistent results
+	- pd.set_option("display.precision", 1)
+	
+-------------------------------------------------------------
+- Plot Settings
+	- print(plt.style.available) #shows predefined plot styles 
+	  https://matplotlib.org/stable/tutorials/introductory/customizing.html
+	- plt.style.use('ggplot') - predefined style inspired from R's ggplot
+	- plt.style.use('seaborn-whitegrid')
+	- plt.style.use('./deeplearning.mplstyle') #user configured custom plot style path
+	- mpl.style.use('default')
+	- mpl.style.use('seaborn-v0_8') #import matplotlib as mpl
+	- %matplotlib inline
+	- %matplotlib notebook #for interactive movement of the 3d plot
+	- %matplotlib widget #for interactive movement of the 3d plot of widgets
+	- %load_ext autoreload
+	- %autoreload 2
+	- plt.rcParams["figure.figsize"] = (35, 15) #runtimeconfiguration
+	- plt.rcParams["lines.markersize"] = 12
+	- plt.rcParams["font.size"] = 8 #runtimeconfiguration
+	- plt.rcParams['image.interpolation'] = 'nearest'
+	- plt.rcParams['image.cmap'] = 'gray'
+	- plt.rc("figure", autolayout=True)
+	- plt.rc("axes", labelweight="bold", labelsize="large", titleweight="bold", titlesize=14, titlepad=10,)
+	- plt.figure(dpi=90)
+	- plt.close("all") #close the previously opened plots
+	- ax.legend(fontsize="xx-large") ##xx-small, small, large
+	- legend = plt.legend(loc='upper center', shadow=True) #seeting the backgournd for legend
+	- plt.legend(prop={"size":14})
+	- frame = legend.get_frame()
+	- frame.set_facecolor('0.90') #setting backgrnd color to the legend frame
+	- line1, = ax.plot([1, 2, 3], label='label1') #legend with handles
+    - line2, = ax.plot([1, 2, 3], label='label2')
+    - ax.legend(handles=[line1, line2])
+	- handles = [Rectangle((0,0), 1, 1, color=_c) for _c in [(0.667,0.0,0.0), (0.0,0.667,0.0), (0.0,0.0,0.667)]]
+	- labels = ["Large Bowel Segmentation Map", "Small Bowel Segmentation Map", "Stomach Segmentation Map"]
+	- plt.legend(handles,labels)
+	- ax.set_xlabel("Size (in 1000 sqft)", fontsize="xx-large")
+	- dlc = dict(dlblue = '#0096ff', dlorange = '#FF9300', dldarkred='#C00000', dlmagenta='#FF40FF', dlpurple='#7030A0') #setting custom colors. can be imported into any module #access = dlc["keyname"]
+	- fig, ax = plt.subplots(figsize=(8, 8))
+	- fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+	- plt.subplots_adjust(bottom=0.35)
+	- plt.subplots_adjust(left=0.25, bottom=0.25)
+	- fig, axes = plt.subplots(nrows=3, ncols=4, figsize=(21, 9))
+	- plt.subplots_adjust(bottom=0.25)
+	- axes[0].set(xlabel="respectivelabel", title="% Respective Title", ylim=(0.0, 1.0))
+	- axes.set_title("Title")
+	- axes.set_xticks(())
+    - axes.set_yticks(())
+	- axes.set_xticks((xvariable))
+	- plt.xticks(ticks=range(len(max_depths)), labels=max_depths) #ticks gives position on axes, labels gives display labels at such position
+	- axes.set_xscale('log') #x axis into log x scale
+	- axes.set_yscale('log')
+	- axes[1].set_ylim(*axes[1].get_ylim())
+	- axes.set_aspect("equal") #proportion of width and height of plot will be equal
+	- axes.set_axis_off()
+	- axes.axis("off")
+	- axes.xaxis.set_visible(False)
+	- axes.yaxis.set_visible(False)
+	- axes.imshow(img)
+	- fig.text(0.1, 0.9, "Click in boxes to fill in values.") #figure text
+	- plt.axis([0, 30, 0, 30]) # Set axis range
+	- fig.set(figwidth=8, dpi=100)
+	- fig = plt.figure(figsize=(10, 5))
+	- fig.set_facecolor("lightgray")
+	- fig.canvas.toolbar_visible = False
+    - fig.canvas.header_visible = False
+    - fig.canvas.footer_visible = False
+	- fig.canvas.draw()
+	- ax = fig.add_subplot(111, projection='3d') #3d
+	- ax = fig.add_subplot(1, 2, 1, projection="3d"); ax = fig.add_subplot(1, 2, 2, projection="3d") #1 row 2 cols pos1, pos2
+	- ax.xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0)) #rgba
+	- ax.yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+	- ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+	- ax.zaxis.set_rotate_label(False)
+	- ax.view_init(15, -120)
+	- ax.plot_surface(W, B, Cost, cmap="Spectral_r", alpha=0.7, antialiased=False)
+    - ax.plot_wireframe(W, B, Cost, color="k", alpha=0.1) #color of lines on the convex shape
+	- from matplotlib import cm
+	- ax.plot_surface(wx, by, cost, cmap=cm.jet, alpha=0.6)
+	- ax.plot_surface(W, B, z_meshgrid, cmap='viridis')
+    - ax.set_xlabel("$w$")
+    - ax.set_ylabel("$b$")
+    - ax.set_zlabel("Cost", rotation=90)
+	- from matplotlib.gridspec import GridSpec
+	- gs = GridSpec(3, 2, figure=fig)  
+	- ax0 = fig.add_subplot(gs[0:2, 0])
+    - ax1 = fig.add_subplot(gs[0, 1])
+    - ax2 = fig.add_subplot(gs[1, 1])
+    - ax3 = fig.add_subplot(gs[2, 1], projection="3d")
+    - axes = [ax0, ax1, ax2, ax3]
+	- x_min, x_max = X[:, 0].min() - 0.5, X[:, 0].max() + 0.5 # create the mesh grid for background colors
+    - y_min, y_max = X[:, 1].min() - 0.5, X[:, 1].max() + 0.5
+	- h = max(x_max - x_min, y_max - y_min) / 200
+    - xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h)) #or set h=someval like 0.02
+	- xx, yy = np.meshgrid(np.linspace(x_min, x_max, 101), np.linspace(y_min, y_max, 101)) #wecan also create 2D meshgrid space using linspace instead of arange, here 101 values are created along each dimension
+	- axes.set_xlim(xx.min(), xx.max())
+	- axes.set_ylim(yy.min(), yy.max())
+	- ax.set_ylim(*ax.get_ylim())
+	- points = np.c_[xx.ravel(), yy.ravel()] #ravel first unrolls the 2d grid to 1d
+	#np.stack([xx.ravel(), xx.ravel()]) also works same #np.column_stack((xx.ravel(), yy.ravel()))
+	- z = np.zeros((len(points),))
+	- for i in range(len(z))
+		z[i] = model.predict(points(i))
+	- z = z.reshape(xx.shape)
+	- cs = plt.contour(xx, yy, z, colors="magenta", lw=1) #decision boundary
+	- cb = plt.colorbar(cs)
+	- contour = ax.contour(xx, yy, Z, levels = [0.5], colors="g")
+	- ax.contour(X_1, X_2, Z, linewidths=1, levels=10**(np.arange(-20., 1, 3)))
+	- CS = ax[1].contour(tmp_w, tmp_b, np.log(z), levels=12, linewidths=2, alpha=0.7, colors=dlcolors)
+	- axes.contourf(xx, yy, z, cmap=plt.cm.Spectral, alpha=0.7)
+	- axes.axis('tight')
+	- axes = plt.gca() #get the coordinate axes position
+	- axes.get_xlim(), axes.get_ylim()
+	- axes.set_xlim([-1.5, 1.5]) #changing the existing x limits
+	- axes.set_ylim([-1.5, 1.5]) #changing the existing y limits
+	- ax.set_xlim(ax.get_xlim())
+    - ax.set_ylim(ax.get_ylim())
+	- plt.show()
+	- plt.tight_layout(pad=0.1) #Adjust the padding between and around subplots.
+	- plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+	- plt.plot(x_ideal, y_ideal, label="True model", linestyle="--", c="orangered")
+	- plt.plot(X, np.repeat(baseline, len(X)), label=f"baseline_200", linestyle="--", c="green") #draw baseline performance line for all X's
+	- plt.plot([initial_epochs-1,initial_epochs-1], plt.ylim(), label='Start Fine Tuning') #draw a vertical line at certain epoch
+	- plt.rcParams["savefig.bbox"] = 'tight'
+	- plt.subplot() to show mislabelled images by NN
+		plt.rcParams["figure.figsize"] = (40, 40) #or plt.figure(figsize=(40, 40))
+		mislabelled_idxs = np.asarray(np.where(test_preds != test_Y))
+		num_px = 64
+		num_images = mislabelled_idxs.shape[1]
+		for i in range(num_images):
+			idx = mislabelled_idxs[1][i]
+			plt.subplot(2, num_images, i+1) #n_rows, n_cols, index position #2 rows, num_images reprsnt cols, i+1 represents index
+			plt.imshow(test_X[:, idx].reshape(num_px, num_px, 3))
+			plt.title("True:\""+classes[test_Y[0, idx]].decode("utf-8")  + "\", Pred: \""+classes[test_preds[0, idx]].decode("utf-8") +"\".")
+			plt.axis("off")
+		plt.show()
+	- Plot all the features(eacg separately) w.r.to target as scatter plot
+		fig,ax = plt.subplots(1, 4, figsize=(12, 3), sharey=True) #assume 4 features, sharing y
+		for i in range(len(ax)): #ranges from 0 to 3 i.e 4
+			ax[i].scatter(X_train_arr[:, i], y_train_arr)
+			ax[i].set_xlabel(X_features[i]) #feature names X_features = ['size(sqft)','bedrooms','floors','age']
+			ax[i].set_title(X_features[i])
+			ax[i].legend()
+		ax[0].set_ylabel("Price (1000's)")
+		fig.suptitle("distribution of features")
+		plt.show()
+	- ax.axvline(x=somevalueonxaxis, label="optimal value", c="purple", lw=2)
+	- ax.axhline(y=somevalueonxaxis, label="optimal value")
+	- ax.vlines(somevalueonxaxis, *ax.get_ylim(), color="black", lw=1) #this also draws a single vertical line at the specified x upto y range
+    - ax.annotate("optimal lambda", xy=(optimal_x_val, 150000), xycoords="data",
+            	 xytext=(-80, 10), textcoords="offset points",
+                 arrowprops={"arrowstyle": "simple"})
+    - ax.annotate("optimal degree", xy=(optimal_degree_val, 80000), xycoords="data",
+                xytext=(0.3, 0.8), textcoords='axes fraction', fontsize=10,
+                   arrowprops=dict(arrowstyle="->", connectionstyle="arc3", 
+                                   color="red", lw=1))
+    ax[1].set_xlabel("degree")
+	- ax.text(0.95, 0.44, "High\nBias", fontsize=12, ha='right', transform=ax[1].transAxes, color = "blue")
+	- ax[1].text(0.5, 0.95,"Click to choose w,b",  bbox=dict(facecolor='white', ec = 'black'), fontsize = 10,
+                transform=ax[1].transAxes, verticalalignment = 'center', horizontalalignment= 'center')
+	- 3d plot or surface plot (soup bowl)
+		dlblue = '#0096ff'; dlorange = '#FF9300'; dldarkred='#C00000'; dlmagenta='#FF40FF'; dlpurple='#7030A0';
+		dlcolors = [dlblue, dlorange, dldarkred, dlmagenta, dlpurple]
+		dlcm = LinearSegmentedColormap.from_list('dl_map', dlcolors, N=5)
+		fig = plt.figure( figsize=(9, 8))
+		fig.set_facecolor('#ffffff') #white
+		fig.canvas.toolbar_position = 'top'
+		gs = GridSpec(2, 2, figure=fig)
+		ax0 = fig.add_subplot(gs[0, 0])
+		ax1 = fig.add_subplot(gs[0, 1])
+		ax2 = fig.add_subplot(gs[1, :],  projection='3d')
+		ax = np.array([ax0, ax1, ax2])
+		#setup useful ranges and common linspaces
+		w_range = np.array([200-300., 200+300]); b_range = np.array([50-300., 50+300]);
+		b_space  = np.linspace(*b_range, 100); w_space  = np.linspace(*w_range, 100);
+		tmp_b, tmp_w = np.meshgrid(b_space, w_space)
+		z = np.zeros_like(tmp_b)
+		for i in range(tmp_w.shape[0]):
+			for j in range(tmp_w.shape[1]):
+				z[i, j] = compute_cost(x_train, y_train, tmp_w[i][j], tmp_b[i][j] )
+				if z[i, j] == 0: z[i, j] = 1e-6
+		ax[2].plot_surface(tmp_w, tmp_b, z, cmap = dlcm, alpha=0.3, antialiased=True)
+		ax[2].plot_wireframe(tmp_w, tmp_b, z, color='k', alpha=0.1)
+		plt.xlabel("$w$")
+		plt.ylabel("$b$")
+		ax[2].zaxis.set_rotate_label(False)
+		ax[2].xaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+		ax[2].yaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+		ax[2].zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
+		ax[2].set_zlabel("J(w, b)\n\n", rotation=90)
+		plt.title("Cost(w,b) \n [You can rotate this figure]", size=12)
+		ax[2].view_init(30, -120)
+	
+	- add a point in 3d plot using scatter3D
+		ax[2].scatter3D(ws, bs, cst , marker='X', s=100) #ax[2] containt the surface plot
+		
+	- Truncate colormap for colormesh or color shading the part of the plot in a meshgrid or to plot probability(for classification)
+		from matplotlib import cm
+		import matplotlib.colors as colors
+
+		def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+			#https://stackoverflow.com/questions/18926031/how-to-extract-a-subset-of-a-colormap-as-a-new-colormap-in-matplotlib
+			""" truncates color map """
+			new_cmap = colors.LinearSegmentedColormap.from_list(
+				'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+				cmap(np.linspace(minval, maxval, n)))
+			return new_cmap
+		##your meshgrid code that get the probabilities using sigmoid g(z)
+		#color map and color bar customization
+		cmap = plt.get_cmap('Blues')
+		new_cmap = truncate_colormap(cmap, 0.0, 0.6)
+		pcm = ax.pcolormesh(tmp_x0, tmp_x1, z,
+							norm=cm.colors.Normalize(vmin=0, vmax=1),
+							cmap=new_cmap, shading='nearest', alpha = 0.9)
+		#pcm = ax[i].pcolormesh(xx, yy, act, cmap=new_cmap,
+                               alpha=0.9,  shading="nearest",
+                               norm=cm.colors.Normalize(vmin=np.amin(act), vmax=np.amax(act))) #to show the vmin and vmax differently
+		ax.figure.colorbar(pcm, ax=ax)
+
+		
+    - matplotlib.cm.Paired has 12 colors, alternating light and dark, multiclass classification plot
+		import matplotlib.pyplot as plt
+        import matplotlib as mpl
+		dkcolors = plt.cm.Paired((1,3,7,9,5,11))  # pick paired colors i,e dark colors
+		ltcolors = plt.cm.Paired((0,2,6,8,4,10)) #light colors
+		dkcolors_map = mpl.colors.ListedColormap(dkcolors) # turn colors into a color map
+		ltcolors_map = mpl.colors.ListedColormap(ltcolors) # These have 6 entries
+		- def plot_data(X, y, equal_xy=False):
+			fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+			classes = len(np.unique(y))
+			for i in range(classes):
+				c_i_idx = np.where(y==i) #
+				c = len(c_i_idx[0]) * [i] #creates an array with values of i of specified length which is being multiplies [0, 0, 0 ...]
+				ax.scatter(X[c_i_idx, 0], X[c_i_idx, 1], label=f"y={i}", marker="o", s=50,
+						   c=c, cmap=dkcolors_map, vmin=0.0, vmax=dkcolors_map.N)
+			ax.set_xlabel("X1"); ax.set_ylabel("X2")
+			ax.legend(loc="best")
+			if equal_xy: ax.axis("equal") #if equal_xy is True, setting ylim on the plot may not work
+			ax.set_title("Multiclass classification Original Training data")
+			plt.show()
+		
+		- Colors for scatter plot of more than 2 classes using color map
+			import matplotlib as mpl
+			def plt_mc_data(ax, X, y, classes,  class_labels=None, map=plt.cm.Paired, legend=False, size=50, m='o'):
+				normy = mpl.colors.Normalize(vmin=0, vmax=classes)
+				map = dkcolors_map
+				classes = 6
+				for i in range(classes):
+					idx = np.where(y == i) #also can be written as X[y==i]
+					label = class_labels[i] if class_labels else "c{}".format(i)
+					ax.scatter(X[idx, 0], X[idx, 1],  marker=m,
+							   color=map(normy(i)),
+							   s=size, label=label)
+				if legend: ax.legend(loc='lower right')
+				ax.axis('equal')
+			plt_mc_data(ax[0], X_train, y_train, classes=6, map=dkcolors_map, legend=True)
+		
+	- set up click events on the plot
+		self.cid = fig.canvas.mpl_connect('button_press_event', self.click_contour)
+		#@output.capture()  # debug
+		def click_contour(self, event):
+			if event.inaxes == self.ax[1]:   #contour plot axes
+				self.w = event.xdata
+				self.b = event.ydata
+			
+	- Button click event
+		# ax3.get_position() - Return the position of the Axes within the figure as a Bbox, basically getting a copy of the axes rectangle in the figure as a Bbox
+        # ax3.get_position().get_points() #gets [[lb_x, lb_y], [rt_x, rt_y]] ,eg:[[0.54772727, 0.11], [0.9, 0.46]] 
+		# lb = leftbelow, rt - right top [xmin, ymin] [xmax, y max] x max = width of axes, y max = height of axes
+        pos = ax3.get_position().get_points() 
+		h = 0.05 
+        width = 0.2
+        ax_button   = plt.axes([pos[1, 0] - width, pos[1, 1] - h, width, h])  #lx, by, w, h #setting the button configs(pos, height and width)
+		self.mybutton = Button(ax_button, 'Run Gradient Descent \nfrom current w,b (click)', color="orange")
+        self.mybutton.on_clicked(self.calc_logistic)
+		@output.capture()  # debug
+		def calc_logistic(self, event):
+            pass
+	
+	- matplotlib Slider
+		from matplotlib.widgets import Slider
+		#creating the axes for sliders
+		ax_s1 = fig.add_axes([0.15, 0.25, 0.30, 0.02]) #left pos from axes, bottom position from axes, width, height
+		sw1 = Slider(ax_s1, "label", valmin=-4.0, valmax=4.0, valinit=0.0, valstep=0.1)
+        sw1.on_changed(funcref)
+		
+	- barh with Slider #horizontal bar graph
+		
+		#set the labels for each z, actv of 4 outputs - z1, z2, a1, a2
+		z_labels = np.array(["z1", "z2"])
+		a_labels = np.array(["a1", "a2"])
+		
+		axs1 = fig.add_axes([0.15, 0.10, 0.30, 0.03])
+		axs2 = fig.add_axes([0.15, 0.15, 0.30, 0.03])
+		z1 = Slider(axs1, label="z1", valmin=-1.0, valmax=10.0, valinit=1.0, valstep=0.1)
+		z2 = Slider(axs2, label="z2", valmin=-1.0, valmax=10.0, valinit=2.0, valstep=0.1)
+		
+		act_vec = my_softmax(np.array([z1.val, z2.val])) #returns 2 softmax activations for each z's
+		z_bar = ax0.barh(y=z_labels, width=[z1.val, z2.val], height=0.6, left=None, align="center")
+		s_bar = ax1.barh(y=a_labels, width=[*act_vec], height=0.6, left=None, align="center", color="red")
+		z_bars = z_bar.get_children()
+		s_bars = s_bar.get_children()
+		def update(val):
+			z_bars[0].set_width(z1.val)
+			z_bars[1].set_width(z2.val)
+			act_vec = my_softmax(np.array([z1.val, z2.val])) #returns 2 softmax activations for each z's
+			s_bars[0].set_width(act_vec[0])
+			s_bars[1].set_width(act_vec[1])
+			fig.canvas.draw_idle()
+		z1.on_changed(update)
+		z2.on_changed(update)
+		
+	- Slider to change the scatter plot dot on a plot (entropy vs p)
+		ax.plot(p_array, entropy, label="Entropy")
+		scatter = ax.scatter(x=0, y=0, c="r", zorder=100, s=70)
+		slider_axes = plt.axes([0.2, 0.1, 0.65, 0.03])
+		ax.legend()
+		s1 = Slider(slider_axes, label="p", valmin=0.0, valinit=0.0, valmax=1.0, valstep=0.05)
+		def update(val):
+			p = s1.val
+			entropy = compute_entropy(p) #function to give entropy based on p
+			scatter.set_offsets((p, entropy)) #moves the scatter dot based on the slider value
+        
+		s1.on_changed(update)
+		
+	- matplotlib button, checkbuttons
+		from matplotlib.widgets import Button, CheckButtons
+		from matplotlib.patches import FancyArrowPatch
+		#Usual button
+		axcalc   = plt.axes([0.1, 0.05, 0.38, 0.075])  #left pos, up pos, w, h
+		self.bcalc = Button(axcalc, 'Run Logistic Regression (click)', color=dlblue) #defining in class, hence self
+        self.bcalc.on_clicked(self.calc_logistic) #calc_logistic is some function
+		#checkbutton
+		axthresh = plt.axes([0.5, 0.05, 0.38, 0.075])  #l,b,w,h
+		self.bthresh = CheckButtons(axthresh, ('Toggle 0.5 threshold (after regression)',)) #multiple check buttons in C1_W1_L8
+        self.bthresh.on_clicked(self.thresh) #some function
+        self.resize_sq(self.bthresh) #resizes the check box when needed
+		#self.bthresh.get_status()[0] #to get the value of checkbutton
+		def resize_sq(self, bcid):
+			""" resizes the check box """
+
+			h = bcid.rectangles[0].get_height()
+			bcid.rectangles[0].set_height(3*h)
+
+			ymax = bcid.rectangles[0].get_bbox().y1
+			ymin = bcid.rectangles[0].get_bbox().y0
+
+			bcid.lines[0][0].set_ydata([ymax,ymin])
+			bcid.lines[0][1].set_ydata([ymin,ymax])
+	
+	- fancy arrow patches
+		from matplotlib.patches import FancyArrowPatch
+		def thresh(self, event):
+        if self.bthresh.get_status()[0]:
+            #plt.figtext(0,0, f"in thresh {self.bthresh.get_status()}")
+            self.draw_thresh()
+        else:
+            #plt.figtext(0,0.3, f"in thresh {self.bthresh.get_status()}")
+            self.remove_thresh()
+
+		def draw_thresh(self):
+			ws = np.squeeze(self.w)
+			xp5 = -self.b/ws if self.logistic else (0.5 - self.b) / ws
+			ylim = self.ax[0].get_ylim()
+			xlim = self.ax[0].get_xlim()
+			a = self.ax[0].fill_between([xlim[0], xp5], [ylim[1], ylim[1]], alpha=0.2, color=dlblue)
+			b = self.ax[0].fill_between([xp5, xlim[1]], [ylim[1], ylim[1]], alpha=0.2, color=dldarkred)
+			c = self.ax[0].annotate("Malignant", xy= [xp5,0.5], xycoords='data',
+				 xytext=[30,5],textcoords='offset points')
+			d = FancyArrowPatch(
+				posA=(xp5, 0.5), posB=(xp5+1.5, 0.5), color=dldarkred,
+				arrowstyle='simple, head_width=5, head_length=10, tail_width=0.0',
+			)
+			self.ax[0].add_artist(d)
+
+			e = self.ax[0].annotate("Benign", xy= [xp5,0.5], xycoords='data',
+						 xytext=[-70,5],textcoords='offset points', ha='left')
+			f = FancyArrowPatch(
+				posA=(xp5, 0.5), posB=(xp5-1.5, 0.5), color=dlblue,
+				arrowstyle='simple, head_width=5, head_length=10, tail_width=0.0',
+			)
+			self.ax[0].add_artist(f)
+			self.tlist = [a,b,c,d,e,f]
+
+			self.fig.canvas.draw()
+
+		def remove_thresh(self):
+			#plt.figtext(0.5,0.0, f"rem thresh {self.bthresh.get_status()}")
+			for artist in self.tlist:
+				artist.remove()
+			self.fig.canvas.draw()
+	
+	- draw_vthresh()
+		from matplotlib.patches import FancyArrowPatch
+		def draw_vthresh(ax, x):
+			""" draws a threshold """
+			ylim = ax.get_ylim() #limits of x axis [-11 , 11]
+			xlim = ax.get_xlim() #limits of y axis [-0.4, 1.1]
+			
+			ax.fill_between([xlim[0], x], [ylim[1], ylim[1]], alpha=0.2, color=dlblue) #blue colored area
+			ax.fill_between([x, xlim[1]], [ylim[1], ylim[1]], alpha=0.2, color=dldarkred) # red colored area
+			
+			ax.annotate("z >= 0", xy=[x, 0.5], xycoords='data',
+						xytext=[30, 5], textcoords='offset points')
+			d = FancyArrowPatch(
+				posA=(x, 0.5), posB=(x+3, 0.5), color=dldarkred,
+				arrowstyle='simple, head_width=5, head_length=10, tail_width=0.0',
+			)
+			ax.add_artist(d)
+			
+			ax.annotate("z < 0", xy=[x, 0.5], xycoords='data',
+						 xytext=[-50, 5],textcoords='offset points', ha='left')
+			f = FancyArrowPatch(
+				posA=(x, 0.5), posB=(x-3, 0.5), color=dlblue,
+				arrowstyle='simple, head_width=5, head_length=10, tail_width=0.0',
+			)
+			ax.add_artist(f)
+		z_tmp = np.arange(-10, 11)
+		y = sigmoid(z_tmp)
+
+		fig, ax = plt.subplots(1, 1, figsize=(5, 3))
+		ax.plot(z_tmp, y, c="b")
+		ax.set_title("Sigmoid function")
+		ax.set_ylabel('sigmoid(z)')
+		ax.set_xlabel('z')
+		draw_vthresh(ax, 0)
+		plt.show()
+		
+	- Adding data to the plot by clicking
+		fig, ax = plt.subplots(1, 1, figsize=(8, 4))
+		self.cid = fig.canvas.mpl_connect('button_press_event', self.add_data)
+		def add_data(self, event):
+			#self.ax[0].text(0.1, 0.1, f"in onclick")
+			if event.inaxes == self.ax[0]:
+				x_coord = event.xdata
+				y_coord = event.ydata
+				if y_coord > 0.5:
+					self.ax[0].scatter(x_coord, 1, marker='x', s=80, c = 'red' )
+					self.y = np.append(self.y,1)
+				else:
+					self.ax[0].scatter(x_coord, 0, marker='o', s=100, facecolors='none', edgecolors=dlblue,lw=3)
+					self.y = np.append(self.y, 0)
+				self.x = np.append(self.x, x_coord)
+			self.fig.canvas.draw()
+		
+	- move the legend outside the axis
+		ax.legend(loc="upper left", bbox_to_anchor=(-0.4, 1.0))
+		ax.legend(loc="upper right", bbox_to_anchor=(1.5, 1), borderaxespad=0.)
+	
+	
+	- Creating the legend using mlines.Line2D and legend(handles=[y_0, y_1]) for categorical dataset of 2 features and 2 classes
+		import matplotlib.lines as mlines
+		def plot_bc_dataset(x=x_bc, y=y_bc, title="x1 vs. x2"):
+			#selecting scatter plot marker dynamically based on y label 
+			for i in range(len(y)):
+				marker = "x" if y[i]==1 else "o"
+				c = "red" if y[i]==1 else "blue"
+				plt.scatter(x[i, 0], x[i, 1], marker=marker, c=c);
+			plt.title("x1 vs x2"); plt.xlabel("X1"); plt.ylabel("X2")
+			#to create legend
+			y_0 = mlines.Line2D([], [], color='r', marker='x', markersize=12, linestyle='None', label='y=1')
+			y_1 = mlines.Line2D([], [], color='b', marker='o', markersize=12, linestyle='None', label='y=0')
+			plt.legend(handles=[y_0, y_1])
+			plt.title(title)
+			plt.show()
+		plot_bc_dataset(x=x_bc, y=y_bc)
+	
+	- Segmentation map and legend using handles and matplotlib.patches
+		import matplotlib.pyplot as plt
+		import matplotlib.patches as mpatches
+		from matplotlib import cm
+		from collections import defaultdict
+		import torch
+
+		def draw_segmentation_map(segmentation, segments_info):
+			fig, ax = plt.subplots()
+			# get the used color map
+			viridis = cm.get_cmap(name="viridis", lut=torch.max(segmentation))
+			ax.imshow(segmentation)
+			# for each segment, draw its legend
+			handles = []
+			instances_counter = defaultdict(int)
+			for segment in segments_info:
+				segment_instance_id = segment["id"]
+				segment_label_id = segment["label"]
+				segment_label = mask2former_model.config.id2label[segment_label_id]
+				legend_label = f"{segment_label}-{instances_counter[segment_label_id]}"
+				instances_counter[segment_label_id] += 1
+				color = viridis(segment_instance_id)
+				handles.append(mpatches.Patch(color=color, label=legend_label))
+			ax.legend(handles=handles)
+			plt.show()
+
+		draw_segmentation_map(**predictions) 
+	
+	- Draw a circle around each categorical class
+		classes = np.unique(y_train) # 0, 1, 2, 3, 4, 5 #6
+		std = 0.4
+		centers = np.array([[-1, 0], [1, 0], [0, 1], [0, -1], [-2,1], [-2,-1]])
+		for c in classes:
+			circle = plt.Circle(centers[c], 2*std, color=dkcolors_map(c), fill=False, lw=0.5, clip_on=False)
+			ax[0].add_patch(circle)
+			
+	-  Images using matplotlib(can also use openCV or Pillow library)
+		original_img = plt.imread("bird_small.png") # Load the image of a bird from directory. we can use it with axis as well
+		plt.imshow(original_img) #visualize the image
+		
+	- Images imshow() to show random images
+		#show the random 64 images
+		def plot_images(X, y):
+			m, n = X.shape
+			fig, axes = plt.subplots(8, 8, figsize=(8, 8))
+			fig.tight_layout(pad=0.1)
+			#fig.tight_layout(pad=0.13, rect=[0, 0.03, 1, 0.91])
+			for idx, ax in enumerate(axes.flat):
+				# Select random index for each axis in 1000 numbers
+				random_idx = np.random.randint(m)
+				# Select rows corresponding to the random indices and reshape the image
+				X_reshaped = X[random_idx].reshape((20, 20)).T
+				#Note the usual examples with columns we feed to the models are actually the transposed values. to reshape to original, we need to again transpose it
+				ax.imshow(X_reshaped, cmap="gray")
+				ax.set_title(y[random_idx, 0])
+				ax.set_axis_off()
+				
+		plot_images(X, y)
+		
+	- show random images using torch
+		fig = plt.figure(figsize=(9, 9))
+		#random 16 images
+		rows, cols = 4, 4
+		for i in range(0, rows*cols):
+			fig.add_subplot(rows, cols, i+1)
+			idx = torch.randint(low=0, high=len(train_data), size=[1]).item() #get the random idx
+			image, label = train_data[idx]
+			plt.imshow(image.squeeze(), cmap="gray") #remove the 1 dimension and make it 2D instead of 3D bcz imshow takes 2D
+			plt.title(f"{class_names[label]}")
+			plt.axis("off")
+		plt.show()
+		
+	- PIL to read the image and predict the class using the trained model
+		from PIL import Image
+		my_image = "my_image.jpg" # change this to the name of your image file 
+		my_label_y = [1] # the true class of your image (1 -> cat, 0 -> non-cat)
+		fname = "images/" + my_image #filepath
+		num_px = 64 #64 pixel image
+		image = np.array(Image.open(fname).resize((num_px, num_px)))
+		plt.imshow(image)
+		image = image / 255. #standardize the image
+		image = image.reshape((1, num_px * num_px * 3)).T #reshaping to (n, m) for DNN
+		my_predicted_image = predict(image, my_label_y, parameters) #predict is the method that perform model frwd prop using learned params for prediction
+		print ("y = " + str(np.squeeze(my_predicted_image)) + ", your L-layer model predicts a \"" + classes[int(np.squeeze(my_predicted_image))].decode("utf-8"))
+		
+	- Feature distribution as histogram and pdf function for numerical features
+		from scipy.stats import norm
+		def norm_plot(ax, data):
+			scale = (np.max(data) - np.min(data)) * 0.2
+			print(scale) #for each column
+			x = np.linspace(np.min(data) - scale, np.max(data) + scale, 50)
+			_, bins, _ = ax.hist(data, x, color="xkcd:azure") #histograms
+			
+			mu = np.mean(data); 
+			std = np.std(data); 
+			dist = norm.pdf(bins, loc=mu, scale = std) #pdf function as bell curve
+			
+			axr = ax.twinx() #shares the x axis with previous axes plot i.e this is drawn on the same plot of histogram
+			axr.plot(bins, dist, color = "orangered", lw=2)
+			axr.set_ylim(bottom=0)
+			axr.axis('off')
+			
+		#Plotting of feature distribution before normalization
+		fig, ax = plt.subplots(1, 4, figsize=(12, 3))
+		for i in range(len(ax)):
+			norm_plot(ax[i], X_train[:, i],) #each feature plot
+			ax[i].set_xlabel(X_features[i]) #each feature name
+		ax[0].set_ylabel("count");
+		fig.suptitle("distribution of features before normalization")
+		plt.show()
+		
+	- from bokeh.io import show, output_notebook
+	- output_notebook() #output_notebook() called in a Jupyter notebook, the output will be inline in the associated notebook output cell
+	- from bokeh.plotting import figure
+	- import plotly.offline as py #showing offline plots as html in either browser or in notebook
+	- py.init_notebook_mode() #mentioning to show the html in notebook
+	- from bokeh.models import Slider, Range1d #see the example in PCA ML specialization
+	- from ipywidgets import interactive, HBox, VBox
+	- import plotly.express as px
+	- from plotly.subplots import make_subplots
+	- import plotly.graph_objects as go
+	- scatter plot using plotly.express
+		import plotly.express as px
+		fig = px.scatter_3d(df_pca_3, x='principal_component_1', y='principal_component_2', z='principal_component_3').update_traces(marker=dict(color="#C00000"))
+		fig.show()
+		
+---------------------------------------------------------------
+- Data Sampling (Sampling the data into x and y's, train, test, validation)
+	- X, Y = load_iris(return_X_y=True, as_frame=True)
+	- df_convert = df.to_numpy() or df.values "df to array conversion"
+	- df_arr = df_convert.copy()
+	- X = df_arr[:, :8] #array
+	- Y = df_arr[:, 8]
+	
+	- X = df.iloc[:, 1:10] #dataframe #for iloc, last index exclusive
+	- Y = df.iloc[:, 10]
+	- df.iloc[0] #first row, df.iloc[[0, 1, 2, 3]] #get rows 0, 1, 2, 3
+	- df.iloc[:, 0] #first column
+	- df.iloc[[0, 1, 2], 0]
+	- df.iloc[0:1000]
+	
+	- X = df.loc[:, df.columns != 'targetcol'] #dataframe
+	- Y = df['targetcol']
+	- X = df.loc[:, ["col1", "col2", "col3"]] #for loc, both indexes inclusive
+	- X = df.loc['col1':'col3']
+	- X = df.loc[[index1, index2]] #get the rows at given index
+	
+	- from sklearn.model_selection import train_test_split
+	  x_train, x_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, shuffle=True, random_state=0, stratify=Y) #sampling
+	
+	- Note that setting the initial random state to the same value ensures item, user, and y are shuffled identically i.e same indexes for all the shuffles
+		item_train, item_test = train_test_split(item_train, train_size=0.80, shuffle=True, random_state=1)
+		user_train, user_test = train_test_split(user_train, train_size=0.80, shuffle=True, random_state=1)
+		y_train, y_test       = train_test_split(y_train,    train_size=0.80, shuffle=True, random_state=1)
+	
+	- X = df.copy()
+	- Y = X.pop('Targetcol')
+	- X_train = X.sample(frac=0.75)
+	- Y_train = Y[X_train.index]
+	- X_test = X.drop(X_train.index)
+	- Y_test = Y[X_test.index]
+	
+	- var = [x for x in df.columns if x not in 'targetcolname'] ## Removing our target variable
+	  X_train, X_test, y_train, y_test = train_test_split(df[var], df['Targetcolname'], train_size = 0.8, random_state = 4)
+	  n = int(len(X_train) * 0.8) ## Let's use 80% to train and 20% to eval
+      X_train_fit, X_train_eval, y_train_fit, y_train_eval = X_train[:n], X_train[n:], y_train[:n], y_train[n:]
+-----------------------------------------------------------------	
+- Descriptive stats and explanatory analysis
+	- df.head()
+	- df[['col1', 'col2', 'col3']].head(10)
+	- df.shape
+	- df.describe(), df.describe(include=['O'])
+	- df.info()
+	- df.dtypes, df.col.dtypes, df.index.dtype
+	- df.columns, df.columns[idx]
+	- df.unique().tolist(), list(df['col'].unique()), np.unique(nparr)
+	- df['col'].nunique() #to get the no. of unique values
+	- df.value_counts().sum(), df.col.value_counts(), df.col.astype('int').value_counts()
+	- df.isnull() , df.isna() , df.isnull().sum(), df.isnull().any()
+	- df[df.col.notna()] #extract only the rows without null values
+	- df[df['col'].isna()] #extract only the rows having null values
+	- df[pd.isnull(df.col)] #extract the rows having null values for column col
+	- miss_value_percentage = 100 * df.isnull().sum() / len(df) #get the percentage of missing columns in a df
+	- df.col.min(), df.col.max()
+	- corr = df.corr()
+	- mask = (abs(corr) > 0.5) & (abs(corr) != 1) #mask to get the features where corr is >0.5 and remove corr of same features which will have corr==1
+	- corr.where(mask).stack().sort_values() #prints those correlated features #featurei correlated with featurej stacked vertically and sorted by its correlation value from lowest to highest 
+	- df.corrwith(df['Col']), df.corrwith(df.Col)
+	- df[['col1', 'col1', 'new_col']].head(10)
+	- df.nlargest(3, 'col') #getting the three rows having the largest values in column "col"
+	- df.nlargest(3, 'col', keep='last') #reverse order, keep='all', all duplicate items are maintained
+	- df.nlargest(3, ['col1', 'col2'])
+	- df.nsmallest(3, 'col') #getting the three rows having the smallest values in column "col"
+	- df.tail()
+	- df["colname"].to_list() #to get the values of a column as a list
+	- df = df.rename(columns={'oldName1': 'newName1', 'oldName2': 'newName2'}) #column name renamin
+	- df = pd.DataFrame("x", index=range(3), columns=list('abcde')) #column names by passing strings as list
+	- #getting the indexes of positive and negative examples
+		y_true_arr = [ 0, 0, 0, 1, 1, 1]
+		pos = y==1
+		neg = y==0
+	- Target data proportion incase of binary classification
+		print(f'target proportion: {sum(y_train)/len(y_train):.4f}')
+	- ndim to check the number of dimensions for a variable/araay
+		if var.ndim == 1:
+			var = np.diag(var) #getting the diagonal of a variable
+	- Remove specific columns from the numpy array using shape
+		array_features_reduced = originalarr.shape[1] - 3 #removes the first 3 feature columns from the original array. Note this just return an integer value.13 - 3 = 10
+
+	
+	- import pandas.plotting as pdplt, import matplotlib.pyplot as plt
+	- plt.hist(df['col'])
+	- plt.scatter(arr_1, arr_2), plt.scatter(df.col1, df.col2), plt.scatter(arr_1, arr_2, marker='x', c='r'), ax.plot(degrees, train_mses, c="r",  marker='o', label="Train MSE"), plt.plot(X[:, 0], X[:, 1], "bx"), plt.plot(x[pos, 0], x[pos, 1], "k+", label=pos_label), plt.plot(x[neg, 0], x[neg, 1], "yo", label=neg_label) #the last few are scatter plot with plot
+	- plt.scatter(X[:, 0], X[:, 1], c=C) #C = [0, 0, 1, 2, 0...] of shape m, when we use this, no need to send pos and neg indexes, can use : to represent all point, c parameter handles the color as c=y
+	- plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.Spectral) #y = [0, 0, 1, 2, 0...] target variable of shape m
+	- pos = y==1
+	- neg = y==0
+	- plt.scatter(X[pos, 0], X[pos, 1], marker="x", c="r", s=10) #2d data where idx = class0 indxs
+	- plt.scatter(X[neg, 0], X[neg, 1], marker="x", c="r", s=10)
+	- plt.boxplot(df), pdplt.boxplot(df.col)
+	- plt.boxplot(df_scores, labels=nameslist, showmeans=True)
+	- df.boxplot(by='col1', colomn=['col2'], grid=False, figsize=(16, 9))
+	- pdplt.boxplot(df)
+	- pdplt.scatter_matrix(df, diagonal='kde')
+	- pdplt.hist_series(df.col),
+	- df.col.value_counts().plot(kind='pie')
+	- df.col.value_counts().plot(kind='bar')
+	- sns.heatmap(corr, cmap='RdBu', annot=True, fmt=".2f")
+	- sns.heatmap(df.isna(), cbar=False)
+	- sns.heatmap(df.corr(), cbar=True)
+	- fig, axes = plt.subplots(1, 2, figsize=(8, 4)) # Plot a comparison
+	- sns.kdeplot(df.col1, fill=True, ax=axes[0])
+	- sns.kdeplot(df.col2, fill=True, ax=axes[1])
+	- sns.relplot(x="col1", y="col2", hue="target", data=df_X, height=6,)
+	- sns.catplot(x="col1", y="target", data=df_X, kind="boxen", height=6) #boxplot with catplot
+	- ax = sns.distplot(targetdf, kde=False, norm_hist=True)
+	- ax = sns.kdeplot(df.col1, color='r', ax=ax)
+	- ax.set_xlabel("LabelRequired")
+	- ax.legend(labels=['label1', 'label2'])
+	- Class Imbalances
+		- plt.hist(df_target)
+		
+	- Setting the index to -> our required feature
+		- df.set_index('col')
+		
+	- Resetting the index
+		- df.reset_index() #also helpful to unpack the cross tabbed multi index
+	
+	- Conditional Selection
+		- df.loc[df.col == 'value']
+			- reviews.loc[(reviews.country == 'Italy') & (reviews.points >= 90)] #for eg, better-than-average wines produced in country Italy
+			- reviews.loc[(reviews.country == 'Italy') | (reviews.taste >= 70)]
+		
+		- df.loc[df.col.isin(['value1', 'value2'])
+			- reviews[(reviews.country.isin(['Australia', 'New Zealand'])) & (reviews.points >=95)] #or operation italy or france
+		
+		- df.loc[df.col.notnull()]
+			- reviews.loc[reviews.price.notnull()]
+		
+		- df.loc[df.col.isnull()]
+			- reviews.loc[reviews.price.isnull()]
+			
+		- df.loc[(df.col1/ df.col2).idxmax(), 'anycol']
+			- bargain_idx = (reviews.points / reviews.price).idxmax() #idxmax gets the index that is maximum of our points to price ratio
+			- bargain_wine = reviews.loc[bargain_idx, 'title']
+		
+		- counts with map() and sum()
+			(Maps allow us to transform data in a DataFrame or Series one value at a time for an entire column)
+			tropical_counts = reviews.description.map(lambda p: 'tropical' in p).sum() #finding word tropical in description of wine reviews df and getting the count of how many times it occured in the wholedf
+			fruity_counts = reviews.description.map(lambda p: 'fruity' in p).sum()
+			descriptor_counts = pd.Series([tropical_counts, fruity_counts], index=['tropical', 'fruity'])
+			
+		- apply() to apply more complex functions to the rows of the data frame
+			def star_rating(row):
+				if row.points >= 95 or row.country == 'Canada':
+					return 3
+				elif 85 <= row.points <= 95:
+					return 2
+				else:
+					return 1
+			star_ratings = reviews.apply(star_rating, axis=1) #we get a series with ratings as stars for easy understanding of ratings
+
+		- Group Transforms / Group Aggregations
+			
+			- df['new_col'] = df.groupby('col1')['col2'].transform('mean') #mean with groupby col1 for operation of col2, likwise median(), max(), min(), count() 
+				- reviews.groupby('points').price.min() #get the chepeast wine for each point category
+			
+			- df.groupby('col1').col1.count() #replication of value_counts() for column col1
+				- reviews.groupby('points').points.count()
+				- reviews.groupby('taster_twitter_handle').size() #groupby() with size() to get counts like value_counts()
+				- reviews.groupby('winery').apply(lambda df: df.title.iloc[0]) #groupby() with apply() #selecting the name of the first wine reviewed from each winery in the dataset
+			
+			- groupby() multiple columns (like crosstabs)(multiindex rather than single index)
+				- reviews.groupby(['country', 'province']).apply(lambda df: df.loc[df.points.idxmax()])
+				- reviews.groupby(['country', 'variety']).size().sort_values(ascending=False) #combination of countries and varieties are most common and sorted in descending order based on counts
+			
+			- groupby() with agg()
+				(to run a bunch of different functions on the DataFrame simultaneously)
+				- reviews.groupby(['country']).price.agg([len, min, max])
+				- price_extremes = reviews.groupby(['variety']).price.agg([min, max]) # the minimum and maximum prices for each variety of wine
+				
+		- Sort values
+			- df.sort_values(by='key', ascending=False)
+				- countries_reviewed.sort_values(by='len')
+			- df.sort_values(by=['col1', 'col2']) #sort by more than one key
+				- countries_reviewed.sort_values(by=['country', 'len'])
+			- df.sort_index(ascending='False') #sort by index
+				- countries_reviewed.sort_index()
+			- df.sort_values() with additional filter
+			# selecting from those top movies, movies that have high average ratings and movies with more than 20 ratings
+			#movieList_df contains "mean rating", "number of ratings", "title"
+			filter=(movieList_df["number of ratings"] > 20) #gives true as value for the filter array(Samesize as movieList_df[col]) when the condition is true else false
+			movieList_df["pred"] = my_predictions #adding new column to the movieList_df
+			movieList_df = movieList_df.reindex(columns=["pred", "mean rating", "number of ratings", "title"])
+			movieList_df.loc[ix[:300]].loc[filter].sort_values("mean rating", ascending=False)
+			
+		- Dataframe chaining
+			frequencies = (train_df["colname"]
+               .value_counts()
+               .to_frame() #converts value counts to dataframe
+               .reset_index()
+               .rename(columns={"index": "colname", "colname": "frequency"}))
+------------------------------------------------------------------	
+- Preprocessing
+	
+	- Datatype conversions/casting
+		- to_numeric()
+			(non-numeric ones are left as it is)
+			- df['col'] = pd.to_numeric(df['col'], errors='coerce', downcast='float') # convert column "a" of a DataFrame, coerce to force the unknown values to NaN
+			- df = df.apply(pd.to_numeric, errors='ignore', downcast='unsigned') # convert all columns of DataFrame to int64 or float64
+			- df[['col1', 'col2']] = df[['col1', 'col2']].apply(pd.to_numeric, downcast='int') # convert just columns "a" and "b", Downcasting explicitly to 'integer' uses the smallest possible integer(instead od int64) to savememore
+		
+		- astype() 
+		    (need to be careful with signed numbers, NaN or inf values raises errors, use errors="ignore" attribute to handle)
+			- df = df.astype(int, errors="ignore") # convert all DataFrame columns to the int64 dtype
+			- df = df.astype({"a": int, "b": complex}) # convert column "a" to int64 dtype and "b" to complex type
+			- s = s.astype(np.float16) # convert Series to float16 type
+			- s = s.astype(str) # convert Series to Python strings
+			- s = s.astype('category') # convert Series to categorical type - see docs for more details
+			- df["predictedtarget"] = X["predictedtarget"].astype("category") #use for clustering predictions to get output as categorical numbers
+
+		- infer_objects()
+		  (pandas introduced it for converting columns of a DataFrame that have an object datatype to a more specific type)
+			- df = df.infer_objects() #changes the type of numeric columns to int64 and string columns are left alone. we can use astype() in such cases
+		
+		- convert_dtypes()
+			(convert Series and DataFrame columns to the best possible dtype that supports the pd.NA missing value)
+			- df = df.convert_dtypes()
+	
+	- Data Leakage
+		- Target Leakage
+			Think about target leakage in terms of the timing or chronological order that data becomes available, not merely whether a feature helps make good predictions
+			eg: target variable got_pneumonia, varible that helps target leakage would be took_antibiotics
+			- Tips to prevention of data leakage
+			- Temporal cutoff 
+				- Any variable updated (or created) after the target value is realized should be excluded.
+			- Add Noise
+				- Add random noise to input data to try and smooth out the effects of possibly leaking variables
+			- Perform Exploratory Data Analysis (EDA)
+				- To detect features that are very highly correlated with the target variable
+			- Check the feature weights
+				- After the completion of the model training use clf.feature_importances_. Observe the features having very high weights
+			- Remove Leaky Variables if you suspect they are leaky
+				- Evaluate simple rule based models like OneR using variables like account numbers and IDs and see if these variables are leaky, and if so, remove them.
+			- Use Pipelines
+				- Heavily use pipeline architectures that allow a sequence of data preparation steps to be performed within cross validation folds, such as the Pipelines in scikit-learn
+					- from sklearn.pipeline import make_pipeline
+					  clf = RandomForestClassifier()
+					  pipe = make_pipeline(clf)
+					  cv = KFold(n_splits=10, random_state=0, shuffle=True)
+					  scores = cross_val_score(pipe, X, Y, cv=cv, scoring='accuracy', error_score='raise')
+					  print(f"Overall average Cross validtion score of the model is: {scores.mean()}")
+			- Use a Holdout Dataset
+				- Hold back an unseen validation dataset as a final sanity check of your model before you use it.
+		
+		- Train Test Contamination
+			- To prevent this, all the preprocessing steps should be done using only the training set
+			- Mostly in cross validation inner loop with the help of scikit Pipeline or R caret package.
+			- By doing so, the fit will not be applied to hold out validation set during training, transformation apples only after training
+			- The model wont be aware of anything about the hold out set and this results in realistic estimations of unseen data.
+			
+	- Data cleaning
+		- Missingness types (missing completely at random (MCAR), Missing at random (MAR), (Missing not at random) MNAR )
+		
+		- Handling Missing values - Null value imputation 
+			- Drop the entire feature
+				(loss of info)
+				- df.drop('col', axis=1) #dropping the entire feature
+							(or)
+				- df.drop(columns=['col1', 'col2', 'col3'], axis=1, errors='raise')
+							(or)
+				- df.drop('col', axis=1, inplace=True)
+			
+			- Dropping the rows where any missing value is present
+				(info loss, may be useful when having huge data and lesser null values)
+				- df.dropna(axis=0, inplace=True)
+					(or)
+				- df_copy = df.copy()
+				- df_copy = df_copy[df_copy['Col'].notna()]
+					(or)
+				- df.dropna(subset=['colwithmissingvals'], how='any', inplace=True)
+				
+			- Filling the NA values with some new value/category
+				#Preferred if the number of missing values is very large, then it can be replaced with a new category
+				- df_copy = df.copy()
+				- df_copy['col'].fillna('Unknown', inplace=True) #we can also use category as 'Other' - our choice
+						(or)
+				- df_copy['new_col'] = df_copy['col'].fillna('Unknown') #without inplace operation - safebet
+			
+			- Replace the nan values with most frequent value/category - mode (for categorical)
+				(Preferred when the percentage of missing values is less)
+				(leads to overfitting when there are many null values)
+				- df_copy = df.copy()
+				- replace_with = df_copy.col.mode()[0]
+				- df_copy.col.fillna(replace_with, inplace=True)
+					(or)
+				- df['Col'] = df['Col'].fillna(df['Col'].value_counts.index[0])
+					train['Cabin']=train['Cabin'].fillna(train['Cabin'].value_counts().index[0])
+			
+			- Mean/Median imputation (for numerical)
+				 (if data doesn’t have many outliers and follows near-normal distribution, use mean imputation)
+				  (uneven distribution, with many outliers, then the Mean will not reflect the actual distribution of the data. Mean is affected greatly by extreme values or outliers)
+				- df['col'] = df['Col'].fillna(df['Col'].mean())
+						(or)
+				- df['Col'] = df['Col'].replace(np.NaN, df['Col'].mean())
+					train['Age'] = train['Age'].replace(np.NaN, train['Age'].mean()) #using replace() for imputation
+			
+			- Median imputaion (for numerical)
+				(unaffected by the outliers, unlike the mean)
+				- df['col'] = df['Col'].fillna(df['Col'].median())
+				- df['Col'] = df['Col'].replace(np.NaN, df['Col'].median())
+					train['Age'] = train['Age'].replace(np.NaN, train['Age'].median())
+			
+			- Interpolation (useful for timeseries datasets where time or date is the index)
+				(the values are filled with incrementing or decrementing values. This imputation technique tries to plot a relationship(linear, polynomial etc) between data points by using the non-null values available to compute the missing points)
+				- Linear interpolation 
+					(plots linear relationship between datapoints, inaccurate estimates)
+					(a straight line is drawn between two points on a graph to determine the other unknown values)
+					- df_interpolated = df.interpolate(method='linear', limit_direction="both")
+							(or)
+					- df_interpolated = df.interpolate(method='linear', limit_direction='forward', axis=0)
+				
+				- Polynomial interpolation 
+					(plots non linear (~) relationship between datapoints, more precise and accurate)
+					(polynomial functions are used on a graph to estimate the missing values in a data set. polynomial's graph fills in the curve between known points to find data between those points.)
+					(Lagrange interpolation, Newton polynomial interpolation, spline interpolation)
+					- df_interpolated = df.interpolate(method='polynomial', order=2)
+						(or)
+					- df['Col'].interpolate(method='polynomial', order=2)
+				
+				- Spline interpolation
+					(plots piecewise-linear relationship between datapoints)
+					(defines multiple simpler polynomials - piecewise functions are used to estimate the missing values and fill the gaps in a data set,  accurate and more reliable)
+					- df['Col'].interpolate(method='spline', order=2)
+				
+			- Extrapolation 
+				(Extra- refers to "in addition to")
+				(extrapolation indicates a user is trying to find/predict a value in addition to existing values, while interpolation means that they want to determine a new value in between existing values)
+				(suppose a data set consists of four given values: 1, 3, 5 and 7. If these values were plotted on a graph and the line was expected to continue in the same way, the fifth value could be extrapolated as 9)
+				
+			- Forwardfill (useful for timeseries datasets where time or date is the index)
+				(ffill function which forwardfills the unknown values with the value in the previous row)
+				- df['Col'] = df.Col.fillna(method='ffill')
+					(or)
+				- df_interpolated = df.interpolate(method='pad', limit=2) #forwardfill with interpolate(), limit specifies how many na values it will fill with the previous value
+				
+			- Backfill (useful for timeseries datasets where time or date is the index)
+				(bfill function which backfills the unknown values with the value in the next row)
+				- df['Col'] = df.Col.fillna(method='bfill')
+				
+			
+			- Target encoding and impute the null values
+			
+			-  SimpleImputer() function from sklearn module 
+				from sklearn.impute import SimpleImputer
+				df['Ageismissing'] = df['Age'].isnull() #creating new column with booleans to make sure the model knows which values comes from imputed value after imputing. this col fills with boolean true or false
+				my_imputer = SimpleImputer(strategy = 'median')
+				updated_df = my_imputer.fit_transform(df)
+				updated_df.info()
+			
+			- Ietrative Imputation 
+				(Training a classifier to impute the null values )
+				(make the feature that we want to impute as target and train a classifier)
+				- KNN imputation
+				- MICE
+				- LogisticRegression
+				- Random Forest
+					df_copy = df.copy()
+					df_train = df_copy[df_copy.col.notna()] #Extract the data with col having values
+					df_test = df_copy[df_copy.col.isna()] #Extract the data with col having null values
+					X = df_train.loc[:, df_train.columns != 'coltobeimputed']
+					Y = df_train['coltobeimputed']
+					X_train , X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1)
+					clf = RandomForestRegressor(n_estimators=100, n_jobs=-1, min_samples_leaf=3) #Training a RF classifier for imputation
+					clf.fit(X_train, X_train)
+					y_train_pred = clf.predict(X_train)
+					print("Training RMSE: %.2f" %(mean_squared_error(Y_age_tr, y_age_train_pred, squared=False)))
+					y_test_pred = clf.predict(X_test)
+					print("Test RMSE: %.2f"%(mean_squared_error(Y_test, y_test_pred, squared=False)))
+					#Using the trained classifier to predict the null values for our feature that is to be imputed.
+					df_test = df_test.drop(columns='colname', axis=1) #first drop the target variable with null values
+					y_null_test_preds = clf.predict(df_test)
+                    #insert the imputed column back to the original df
+					df_test.insert(1, 'colname', y_null_test_preds) #Join the imputed target to the dropped dataframe back again
+					frames = [df_train, df_test] #Merge the dataframes together now
+					final_imputed_df = pd.concat(frames) #concatenate the frames
+			
+		    - DeepL Datawig
+				from datawig.utils import random_split
+				from datawig import SimpleImputer
+				from sklearn.metrics import matthews_corrcoef, mean_squared_error
+				df_train, df_test = random_split(df, split_ratios=[0.8, 0.2]) # Perform train-test split (Default is 80/20 split)
+				# Randomly hide 25% of cells in test dataframe
+				hide_proportion = 0.25
+				df_test_missing = df_test.mask(np.random.rand(*df_test.shape) > (1 - hide_proportion))
+				input_cols = ['Age', 'Sex', 'RestBP', 'Chol', 'Fbs', 'ExAng', 'RestECG'] # Define columns with useful info for to-be-imputed column
+				# Define columns to be imputed
+				output_col_num = 'MaxHR' # Numerical output col
+				output_col_cat = 'ChestPain' # Categorical output col
+				# Initialize imputer for numerical imputation
+				imputer_num = SimpleImputer(input_columns=input_cols, output_column=output_col_num,  # Column to be imputed
+								 output_path='../artifacts/imputer_model_num'  # Store model, data, and metrics
+								 )
+				# Initialize imputer for categorical imputation
+				imputer_cat = SimpleImputer(input_columns=input_cols, output_column=output_col_cat,  # Column to be imputed
+								 output_path='../artifacts/imputer_model_cat'  # Store model, data, and metrics
+								 )
+				# Numerical imputation model fit
+				imputer_num.fit_hpo(train_df=df_train, learning_rate_candidates=[1e-2, 1e-3, 1e-4, 1e-5], numeric_latent_dim_candidates=[10, 20, 50, 100], numeric_hidden_layers_candidates=[0, 1, 2], final_fc_hidden_units=[[100], [150]],)
+				# Categorical imputation model fit
+				imputer_cat.fit_hpo(train_df=df_train)
+				# Impute missing values and return original dataframe with predictions
+				predictions_num = imputer_num.predict(df_test_missing)
+				predictions_cat = imputer_cat.predict(df_test_missing)
+				# Evaluation of numerical imputation
+				mse_datawig = mean_squared_error(df_test[output_col_num], predictions_num[f'{output_col_num}_imputed']))
+				# Evaluation of categorical imputation
+				mcc_datawig = matthews_corrcoef(df_test[output_col_cat], predictions_cat[f'{output_col_cat}_imputed'])
+	
+	- Data formatting (Encoding)
+		- Label Encoding (for target)
+			(5 distinct values of nominal/categorical attribute to 0, 1, 2, 3, and 4. May suffer with priority issues)
+			- labelencoder = LabelEncoder()
+			- df['col'] = labelencoder.fit_transform(df.col)
+
+		- One Hot Encoding (for nominal attributes)
+			- onehotencoder= OneHotEncoder(drop='first', sparse=False, handle_unknown='error') #whole df #returns np.array
+			- df_arr_encoded = onehotencoder.fit_transform(df)
+			- df_encoded = pd.DataFrame(df_arr_encoded, columns=onehotencoder.get_feature_names_out()) #to convert numpy array to dataframe
+			- df_encoded = pd.DataFrame(df_arr_encoded, columns=['colname']) #second way to convert numpy array to dataframe
+			
+			- onehotencoder_feature = OneHotEncoder(drop='first', sparse=False)
+			- feature_encoded = onehotencoder_feature.fit_transform(df[['col']]) #single feature
+			- df_encoded = df_encoded.join(pd.DataFrame(feature_encoded.toarray(), columns=onehotencoder_feature.get_feature_names_out()))
+			
+			- encoded_df= pd.get_dummies(df, drop_first=True, sparse=False) #using pandas, it encodes all the categorical variables, drop_first to handle last variable value
+			- encoded_df = pd.get_dummies(data=df, prefix=[columnnamestobeencoded], columns=[columnnamestobeencoded])#replaces the columns with the one-hot encoded ones and keep the columns outside 'columns' argument as it is
+			  #prefix and columns should have same length. it should have the column names that is to be encoded
+					
+		- Ordinal Encoding (for ordinary related features)
+			- ordinalencoder = OrdinalEncoder() or OrdinalEncoder(categories=[]) #categories to change the ordinary order
+			- df_encoded = encoder.fit_transform(data)
+			
+		- Target encoding (for high cardinality categorical features)
+		
+		- Embedded encoding (for categorical nominal features)
+			(to overcome sparsity, priority and order changing issues of one hot encoding, generates embeddings using NN)
+			-   from tensorflow.keras.models import Sequential
+				from tensorflow.keras.layers import Dense, Embedding
+				import numpy as np
+				model = Sequential()
+				embedding_layer = Embedding(input_dim=10, output_dim=4, input_length=6)
+				model.add(embedding_layer)
+				model.compile('adam','mse')
+				input_data = np.array([[1, 2, 3, 6, 3, 2]])
+				pred = model.predict(input_data)
+				print(pred)
+				print(embedding_layer.get_weights())
+				print(embedding_layer.get_weights()[0].shape)
+		
+	- Discretization for numerical attributes
+		- Changing the range to log transform (For attributes like price in float)
+			- df_copy = df.copy()
+			- df_copy['col_log'] = np.log(df_copy['col'] + 1) # If the feature has 0.0 values
+						(or)
+			- df_copy['col_log'] = df.col.apply(np.log1p)  #np.log1p =  (log(1+x))
+		
+		- Binning (followed by one hot encoding)
+			- Uniform Binning (Equal Width Binning)
+				df['col_descritized'] = pd.qcut(df['col'], q=10, labels=False, precision=0)
+				#pd.qcut(df['col'], q=10, labels=False, precision=0).value_counts()..plot(kind='bar') for viewing the bins
+				
+			- Quantile Binning (Equal frequnecy Binning)
+			
+			- K-means binning (KBinsDiscretizer)
+				
+				- from sklearn.preprocessing import KBinsDiscretizer
+				- from sklearn.compose import ColumnTransformer
+				- df = pd.read_csv('file', usecols=['col1', 'col2', 'col3'])
+				- X = df.iloc[:, 1:]
+				- Y = df.iloc[:, 0]
+				- X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.25, random_state=0)
+				- Kbins_col1 = KBinsDiscretizer(n_bins=15, encode='ordinal', strategy='quantile')
+				- Kbins_col2 = KBinsDiscretizer(n_bins=15, encode='ordinal', strategy='quantile')
+				- column_trf = ColumnTransformer([('first', Kbins_col1, [0]),('second', Kbins_col2, [1])]) #Transform the columns using Column Transformer
+				- df_train_trf = column_trf.fit_transform(X_train)
+				- df_test_trf = column_trf.transform(X_test)
+				- print(column_trf.named_transformers_['first'].n_bins_) #Print the number of bins and the intervals point for the “Age” Column
+				- print(column_trf.named_transformers_['first'].bin_edges_) #print the intervals point for the “Age” Column
+
+			- Custom Domain based Binning
+			
+			- Binarization
+	
+	- Data transformation (Feature Scaling and transforming(or normalizing))
+	- Feature Normalization or scaling
+		Transformation required as most models follow normally distributed assumption(error is normally distributed)
+		- from sklearn.preprocessing import StandardScaler, Normalizer, MinMaxScaler, Normalizer
+		- scaler = StandardScaler().fit(x_train), X_scaled = datascaler.transform(x_train) "Standardization(mean 0 - all the feature values centered at zero, sd 1)- equal importance for all values"
+		- scaler = Normalizer().fit(x_train), X_scaled = scaler.transform(x_train) "Normalization/scaling (transform data to maintain same scale between 0 and 1)"
+		- scaler = Binarizer().fit(x_train), X_scaled = scaler.transform(x_train) "Binarization"
+		- scaler = MinMaxScaler(feature_range=(0, 1)).fit(x_train), X_scaled = scaler.transform(x_train)
+			#x_scaled = (x_orig - xmin) / (xmax - xmin)
+			#x_orig = x_scaled * (xmax - xmin) + xmin
+		- X_scaled_arr.std(axis=0) #standard deviation
+		- X_scaled_arr.mean(axis=0) #mean	
+		- Box cox transformation (transforms non normal data or feature to normal data)(works for only positive values)
+			Parameter lambda = -5 to 5 (-3 = 1/y3, -2 = 1/y2, -1 = 1/y, -0.5=1/sqrt(y), 0=log y, 0.5=sqrt(y), 1=y, 2=y2, 3=y3)
+		- Log transformation, sqrt transformation, power transformation, inverse/reciprocal transformation, exponentail transformation, arcsine transformation
+			- Applying log or sqrt or inverse on attributes with larger/smaller values
+			- If the true function resembles x2 = y, generate x2 to make modelling easier
+			- Converting the population in billions to millions or lesser number
+	    - Inverse scaling while predicting to retain the scaled value to original value
+			original_train = scaler.inverse_transform(x_train_scaled)
+			original_pred = scaler.inverse_transform(x_pred_from_scaled_x)
+	
+	- Feature Engineering 
+		(Representation Problem - construction of new features from existing, improve a model's predictive performance, reduce computational or data needs, improve interpretability of the results)
+		
+		- Feature Extraction
+			(reducing the dimensions to create new lower meaningful dimensions automatically using projection methods)
+			- Feature Reduction / Dimensionality Reduction
+				- PCA (linear) unsupervised
+					(Decompose a dataset's variation into features with principal components)
+					from sklearn.decomposition import PCA
+				- LDA (Linear)
+				- SVD
+				- t-SNE (non linear)
+				- Word Embedding
+				- Target Encoding
+		
+		- Feature Selection 
+			(selecting subset of features using scoring methods)
+			(always do feature selection in the inner loop of cross validation(training fold) of the pipeline to avoid data leakage)(right before the model training)
+			
+			- Filter Methods (Rank based)
+				(Feature are ranked using the below criteria without target(unsupervised) or w.r.to target(supervised))
+				
+				- Correlation coefficient / Correlation matrix (with target, with other features) -1 to +1
+					(statiscal summary of relationship(cause/depend/associate) between variables)
+					(only detects linear relationship between variables. Correlation can be postive, negative or neutral)
+					(Multicollinearity = 2 or more variables are tightly related)
+				
+				- Covariance (-∞ to +∞), covariance matrix
+					Summarizes the linear relationship between variables. Use when (guassian distribution + linear relationship between variables)
+					(variance of some random variable X is a measure of how much values in the distribution vary on average with respect to the mean)
+					(Covariance is joint probability i.e systematic relationship between two random variables which describes how the two variables change together)
+					from numpy.random import randn, seed
+					from numpy import cov
+					seed(1)
+					x1 = 20 * randn(1000) + 100
+					x2 = x1 + (10 * randn(1000) + 50)
+					covariance_matrix = cov(x1, x2) # returns covariance matrix
+					print(covariance_matrix)
+			
+				- Pearson's correlation coefficient (-1 to +1 )
+					(Summarizes the strength of the linear relationship between variables.
+					Use when I/P - Numerical, O/P - Numerical
+					Use when (guassian distribution + linear relationship between variables))
+					from numpy.random import randn, seed
+					from scipy.stats import pearsonr
+					from sklearn.feature_selection import  SelectKBest, f_regression, SelectPercentile #f_regression is pearson from sklearn
+					import numpy as np
+					seed(1)
+					x1 = 20 * randn(1000) + 100
+					x2 = x1 + (10 * randn(1000) + 50)
+					pearson_corr = pearsonr(x1, x2) # returns covariance matrix
+					print(pearson_corr)
+					print(pearson_corr.statistic)
+					print(pearson_corr.confidence_interval(confidence_level=0.95)) #computes the confidence interval of the correlation coefficient `statistic` for the given confidence level.
+					#Also can Use numpy arr.corrcoef() /pandas df.corr(method="pearson") for calculating corr of more than 2 features
+					xyz = np.array([
+					[10, 11, 12, 13, 14, 15, 16, 17, 18, 19], 
+					[2, 1, 4, 5, 8, 12, 18, 25, 96, 48],
+                    [5, 3, 2, 1, 0, -2, -8, -11, -15, -16]]) #we are creating a 3d array.
+					print(xyz)
+					print(np.corrcoef(xyz, rowvar=False))
+
+				- Spearman's correlation coefficient (-1 to +1)
+					Summarize the monotonic(increase/decrease) i.e non-linear relationship between variables
+					Use when I/P - Numerical, O/P - Numerical
+					Use when (non-guassian(non parametric distributions) + non-linear relationship between variables => no linear assumption)
+					from numpy.random import randn, seed
+					from scipy.stats import spearmanr
+					import numpy as np
+					import pandas as pd
+					seed(1)
+					x1 = 20 * randn(1000) + 100
+					x2 = x1 + (10 * randn(1000) + 50)
+					spearman_corr, _ = spearmanr(x1, x2) # return covariance matrix
+					print(spearman_corr)
+					#we can also pandas corr() when dealing with pd series/df
+					df = pd.DataFrame({'x1': x1, 'x2': x2})
+					corr_coef = df.corr(method='spearman')
+					print(corr_coef)
+             	
+				- Chi square test (non-parametric statistical significance hypothesis test)
+					Use when - (input, output - categorical)
+					- chi-square goodness of fit test, "chi-square test of independence", chi-square test of homogeneity
+					- null hypothesis(what u expect), alternate hypothesis, contingency table, observed and expected values, chi square statistic, significance level alpha, critical value, p-value
+					- if chi-square value/statistic >= critical value or p-value <= alpha, (Reject the null hypothesis, statistically significant)
+					- If statistic < critical value, p-value > alpha, fail to reject null hypothesis (statistically not significant)
+					import pandas as pd
+					from sklearn.preprocessing import OrdinalEncoder, LabelEncoder
+					from sklearn.feature_selection import chi2, SelectKBest
+					import matplotlib.pyplot as plt
+					from sklearn.model_selection import KFold
+					from sklearn.pipeline import Pipeline
+					from sklearn.metrics import accuracy_score
+					def load_data(filepath):
+						data_csv = pd.read_csv(filepath)
+						data = data_csv.values
+						X = data[:, 1:]
+						Y = data[:, 0]
+						X = X.astype(str) #sometimes pandas tries to convert few features to integers.Hence making sure everything to be string/categorical
+						return X, Y
+					#Ordinal Encoding the categorical input features
+					def prepare_input(train, test):
+						oe = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=10000)
+						oe.fit(train)
+						X_train_enc = oe.transform(train)
+						X_test_enc = oe.transform(test)
+						return X_train_enc, X_test_enc
+					#Encoding the categorical output
+					def prepare_output(train, test):
+						le = LabelEncoder()
+						le.fit(train)
+						Y_train_enc = le.transform(train)
+						Y_test_enc = le.transform(test)
+						return Y_train_enc, Y_test_enc
+					X, Y = load_data("E:\Learning\ML\Datasets\data\\breast-cancer.data")
+					x_train, x_test, y_train, y_test = train_test_split(X , Y, test_size=0.33, random_state=0, shuffle=True)
+					X_train_enc, X_test_enc = prepare_input(x_train, x_test) #Encoding
+					Y_train_enc, Y_test_enc = prepare_output(y_train, y_test)
+					#Using the SelectKBest with chi2() to find out the best features w.r.to target y
+					chi_fs = SelectKBest(score_func=chi2, k='all') #Here we are specifying k as all for now.Just to plot and visualise all the feature scores.
+					#chi = SelectKBest(score_func=chi2, k=4) #we can also change it to required features after finding out which features are performing well with all option
+					chi_fs.fit(X_train_enc, Y_train_enc)
+					X_train_fs = chi_fs.transform(X_train_enc)
+					X_test_fs = chi_fs.transform(X_test_enc)
+					for i in range(len(chi_fs.scores_)):
+						print("Feature: %d , score: %f" %(i, chi_fs.scores_[i])) #Chi square scores for each feature of input
+					plt.bar([i for i in range(len(chi_fs.scores_))], chi_fs.scores_)
+					plt.show()
+					#Training with all the features to check the performance
+					cv = KFold(n_splits=10, random_state=0, shuffle=True)
+					model = LogisticRegression(solver='lbfgs')
+					score = cross_val_score(model, X_train_fs, Y_train_enc, cv=cv, scoring='accuracy', error_score='raise', n_jobs=-1)
+					print("CV score - all features %f"%mean(score))
+					model.fit(X_train_fs, Y_train_enc)
+					y_train_preds = model.predict(X_train_fs)
+					print("Chi square - all features - Training accuracy: %f" %(accuracy_score(Y_train_enc, y_train_preds)))
+					y_pred = model.predict(X_test_fs)
+					print(" Chi square - all features - Test accuracy: %f" %(accuracy_score(Y_test_enc, y_pred)))
+				
+				- Mutual Information
+					(measuring associations between a feature and the target.detects any kind of relationship, not just linear)
+				    Use when - (i/p , output - categorical/numerical - data typr agnostic)
+					from sklearn.feature_selection import mutual_info_classif, SelectKBest, SelectPercentile
+					mutual_info_fs = SelectKBest(score_func=mutual_info_classif, k='all') #using all just to see all the feature scores
+					mutual_info_fs = SelectPercentile(score_func=mutual_info_classif, k='all')
+					mutual_info_fs.fit(X_train_enc, Y_train_enc)
+					X_train_fs = mutual_info_fs.transform(X_train_enc)
+					X_test_fs = mutual_info_fs.transform(X_test_enc)
+					for i in range(len(mutual_info_fs.scores_)):
+						print("Feature: %d , score: %f" %(i, mutual_info_fs.scores_[i])) #mutual_info  scores for each feature of input
+					plt.bar([i for i in range(len(mutual_info_fs.scores_))], mutual_info_fs.scores_)
+					plt.show()	
+				
+				- ANOVA - analysis of variance
+					Summarizes linear relationship between variables, compare means among three or more groups
+					To perform an ANOVA test, you need to have one categorical independent variable and one numeric dependent variable. The independent variable should have at least three levels (i.e. at least three different groups or categories). The dependent variable should be continuous and normally distributed. 
+					I/P - Categorical , O/P - Numerical (it can be used for viceversa as well)
+					Pearson’s Correlation Coefficient: f_regression()
+					from sklearn.feature_selection import SelectKBest, f_classif, SelectPercentile
+					#ANOVA: f_classif()
+					from sklearn.datasets import make_classification
+					from sklearn.feature_selection import SelectKBest, f_classif
+					X, y = make_classification(n_samples=100, n_features=20, n_informative=2)
+					fs = SelectKBest(score_func=f_classif, k=2) #Anova-F
+					X_selected = fs.fit_transform(X, y) 
+					print(X_selected.shape)
+
+				- KendallTau (non parametric)
+					(non-linear relationship, assumes the categorical variables follows ordinal order)
+					(I/P , O/P - Categorical/ Numerical)
+					from numpy.random import rand
+					from numpy.random import seed
+					from scipy.stats import kendalltau
+					# seed random number generator
+					seed(1)
+					# prepare data
+					data1 = rand(1000) * 20
+					data2 = data1 + (rand(1000) * 10)
+					# calculate kendall's correlation
+					coef, p = kendalltau(data1, data2)
+					print('Kendall correlation coefficient: %.3f' % coef)
+					# interpret the significance
+					alpha = 0.05
+					if p > alpha:
+					 print('Samples are uncorrelated (fail to reject H0) p=%.3f' % p)
+					else:
+					 print('Samples are correlated (reject H0) p=%.3f' % p)
+					
+					corr_coef = df.corr(method='kendall')
+					
+				- McNemar's Test 
+					(non-parametric test for paired nominal data)
+					(helps in finding a change in proportion for the paired data.It allows you to determine whether the proportions of the variables are equal)
+				
+			- Wrapper Methods
+				(selects subset of features and run different combination of classifiers with those features and evaluate the performance to all the combinations.This goes recursively and remove the features based on models accuracy scores)
+				(backward elimination - starting with all features in the training dataset and successfully removing features until the desired number remains
+				forward elimination - starting with zero or one features in the training dataset and successfully add features until the desired number remains)
+				
+				- Recursive Feature Elmination (RFE)
+					from numpy import mean, std
+					from sklearn.datasets import make_classification
+					from sklearn.ensemble import ExtraTreesClassifier
+					from sklearn.linear_model import SGDClassifier
+					from sklearn.model_selection import RepeatedStratifiedKFold, cross_val_score, train_test_split
+					from sklearn.feature_selection import RFE
+					from sklearn.pipeline import Pipeline
+
+					X, Y = make_classification(n_samples=800, n_features=10, n_classes=2, n_informative=7, n_redundant=3)
+					rfe = RFE(estimator=ExtraTreesClassifier(), n_features_to_select=7, step=1)
+					clf = SGDClassifier()
+					cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=15, random_state=0)
+					pipe = Pipeline([('featsel', rfe), ('mdl', clf)])
+					x_train , x_test, y_train, y_test = train_test_split(X, Y, test_size=0.33, shuffle=True, random_state=0)
+					scores = cross_val_score(pipe, x_train, y_train, cv=cv, scoring='accuracy', n_jobs=-1, error_score='raise')
+					print("Training Accuracy: {}, Std: {}".format(mean(scores), std(scores)))
+					pipe.fit(x_train, y_train) #fit = fit() + transform()
+					print(rfe.support_) #gives mask of the features #eg [False False  True  True]
+					print(rfe.ranking_) #gives 1 to best selected features #eg [2 3 1 1]
+					y_preds = pipe.predict(x_test) #predict = transform() + predict(). hence transformation applies on test data directly when we predict
+					print("Test Accuracy: {}".format(accuracy_score(y_test, y_preds)))
+					
+				- RFECV (RFE with cross validation helps to choose best hyperparameters for RFE)
+					from sklearn.datasets import make_classification
+					from sklearn.feature_selection import RFECV
+					from sklearn.model_selection import train_test_split, RepeatedKFold, cross_val_score
+					from sklearn.linear_model import LogisticRegression
+					from sklearn.tree import DecisionTreeClassifier
+					from sklearn.metrics import accuracy_score
+					from sklearn.pipeline import Pipeline
+					import matplotlib.pyplot as plt
+					def get_data():
+						X, Y = make_classification(n_samples=1000, n_features=10, n_informative=6)
+						return X, Y
+					def evaluate(estimator, X, Y):
+						cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=0)
+						scores = cross_val_score(estimator, X, Y, cv=cv, error_score='raise', scoring='accuracy')
+						return scores
+					X, Y = get_data()
+					x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.33, random_state=0)
+					customied_cv = RepeatedKFold(n_repeats=4, n_splits=10, random_state=0)
+					rfecv = RFECV(estimator=DecisionTreeClassifier(), min_features_to_select=2, cv=customied_cv)
+					model = LogisticRegression()
+					pipe = Pipeline([('s', rfecv), ('mdl', model)])
+					scores = evaluate(pipe, x_train, y_train)
+					print("cv score using rfecv is: %.2f" % (mean(scores)))
+					pipe.fit(x_train, y_train)
+					print("Test accuracy: %.2f"%(pipe.score(x_test, y_test)))
+					#Finding out the best params
+					for i in range(x_train.shape[1]):
+						print("Feature: {} support: {}, score: {}".format(i , rfecv.support_[i], rfecv.ranking_[i]))
+					plt.boxplot(scores, showmeans=True)
+					plt.show()
+				
+			- Embedded or Intrinsix Methods
+				- Bake in feature selection 
+					(Learns which features are contributing more to the model accuracy during model training)
+					- RandomForest
+					- GradientBoosting
+					- StepwiseRegression
+					
+				- Regularisation methods that discount or penalises the constribution of features to avoid overfitting
+					- LASSO 
+						from sklearn.linear_model import Lasso
+					- Ridge regression 
+					- Elastic Net
+			
+				- Iterative trail and error model performance with subsets of features
+					- Random forest
+					
+					- Extra trees 
+						clf = ExtraTreesClassifier()
+						clf.fit(X, Y)
+						print(clf.feature_names_in_) #get the feature names as list
+						print(clf.feature_importances_) #identify important features based on scores of features as a list
+						
+					- Neural Networks
+
+		
+		- Feature Construction 
+			(Manual construction of features from raw data)
+			- Attribute decomposition
+				- Decomposing date attribute with time to date and time
+				- For attributes like population to millions from trillions
+				- For attributes like income: Yearly income (divided by 10,000) or logarithm of income
+				- Ratio of monthly credit card expenditure to yearly income
+				- From credit card expenditure - Average monthly credit card expenditure
+			
+			- Attribute aggregation
+				- age from date of birth
+				- children and parents and spouse to family size
+				
+			- Creating Polynomial Features (for non linear data)
+				from sklearn.preprocessing import PolynomialFeatures
+				poly = PolynomialFeatures(degree=3, include_bias=False) #creates x^2, x^3 for all the features
+				X_mapped = poly.fit_transform(X)
+
+		
+		- Feature Learning / Representational Learning
+			(automatic identification and use of features in raw data by learning)
+			- Auto Encoders
+			- Restricted Boltzmann Machines
+		
+	- Handling Class Imbalances (Removing skew)
+		- Undersampling
+			- Random
+			- SMOTE
+		- Oversampling
+			- Random
+			- SMOTE	
+		- Using different evaluation meseaures
+			- Precision
+			- Recall
+			- F1
+			- ROC AUC
+			
+	- Identifying and handling Outliers
+		- Capping
+		- Gaussian Density Estimation
+	
+	- Miscealleneous
+		- Handling string operations
+			
+			- splitting attribute like "name" into 3 parts using ".str.split()" 
+				- df_splitted_col = df.col.str.split(" ", n=3, expand=True) #string functions can be applied using str
+			
+			- reshaping the np array
+				#making the 1d array to 2d array by creating a column vector i.e one column
+					y = y.reshape(-1, 1) 
+					y = np.expand_dims(y, axis=1)
+					y = y[:, np.newaxis]
+				#creating a row vector
+					y = y.reshape(1, -1) 
+					y = np.expand_dims(y, axis=0)
+					y = y[np.newaxis, :]
+			
+			- print the colors in the print statement
+				print("\033[92m" + "Your backpropagation implementation is correct and the difference is: " +str(difference)+ "\033[0m") #green color
+				print("\033[93m" + "Your backprogation implementation is wrong, the difference is: " +str(difference)+ "\033[0m") #red color
+				print('\033[1mWith training=False\033[0m\n') #with bold text
+				
+				from termcolor import colored
+				print(colored("All tests passed!", "green"))
+				print(colored("Test failed", attrs=['bold']),
+                      "\n Expected value \n\n", colored(f"{b}", "green"), 
+                      "\n\n does not match the input value: \n\n", 
+                      colored(f"{a}", "red"))
+				
+			- Check whether all the labels (for eg at a tree nodes) belongs to same class
+				-   def all_instances_same_class(labels):
+						return len(set(labels)) == 1 #removes duplicates
+
+					# Example usage:
+					labels = [0, 0, 0, 0, 0]  # Replace with your list of class labels
+					result = all_instances_same_class(labels)
+					
+				- Using counter to find out the target distribution
+					from collections import Counter
+					labels = [0, 1, 0, 1, 0]
+					label_counts = Counter(labels) #gives the dictionary of each value and its count
+					#print(Counter(y))
+    
+					# Check if there is only one class label (i.e., only one element in the dictionary)
+					if len(label_counts) == 1:
+						return True
+
+			- np.where() to acts a ternary operator to update values
+				- array = np.where(arraycondition , 'valiftrue', 'valueiffalse')
+					- x = np.where((x < 5) | (x > 8), x/2, x)
+				- y_preds = np.where(y_probs <= 0.5, 0, 1) #assigning 0 0r 1, 0 when y<=0.5 and 1 when y>0.5
+				- 
+			
+			- np.where() equivalent in pandas
+				- df['col'] = (value_if_false).where(condition, value_if_true)
+					- df['col'] = (df['col'] / 2).where(df['col'] < 20, df['col'] * 2)
+				
+			
+			- collaborative filtering when we have Y(nusers, nratings) = user ratings, R() boolean ratings of same size
+				# From the matrix, we can compute statistics like average rating.
+				mean = np.mean(Y[0, R[0, :].astype("bool")]) #for first user
+			
+			- np.c_ with astype(int) to make values 1 when the condition where a value > 0 in the array
+				Y = np.c_[my_ratings, Y]
+				R = np.c_[(my_ratings != 0).astype(int), R]
+				
+			- np.nansum(vector/matrix/probabilityvector)
+				Performs sum of all the values in the vector making nan values to 0
+				np.nansum(logprobscostvec)
+				
+			- peak to peak (min - max)
+				print(f"Peak to peak of X: {np.ptp(X_train, axis=0)}") #gives max - min value of the columns
+
+			- str.contains() and np.select(condlist, choicelist, default=0)
+			
+			- np.exp? (for example) to get quick access to the documentation.
+			
+			- classification error
+				np.mean(predictions != ground_truth)
+			
+			- classification accuracy
+				np.mean(predictions == ground_truth)
+			
+			- Classification accuracy using np.mean
+				print(f"Training accuracy: {100 - np.mean(np.abs(y_train_preds - train_set_y)) * 100}")
+				# The formula used is (1 - mean_absolute_error) * 100 to convert the mean absolute error into a percentage accuracy.
+				
+			- Euclidean distance between two points using np.linalg.norm
+				np.linalg.norm(X[i] - centroids[j]) #this gives sqrt(a^2 + b^2...)
+				
+			- Normalization of the input vector across features(feature normalization)
+				- # Compute x_norm as the norm 2 of x. Use np.linalg.norm(..., ord = 2, axis = ..., keepdims = True)
+				x = np.array([[0, 3, 4], [1, 6, 4]])
+				x_norm = np.linalg.norm(x, axis=0, keepdims=True) #normalizing across the features
+				# Divide x by its norm
+				x_normalized = x / x_norm
+				
+				
+			- Determinant of a matrix
+				np.linalg.det(var)
+			
+			- Matrix multiplication instead of np.dot(X, w)
+				np.matmul(X, w)
+				X @ w
+			
+			- Exponentiation
+				np.exp()
+			
+			- np.clip() to precent overflow
+				z = np.clip( z, -500, 500 )  
+			
+			- np.maximum() to find out element-wise maximum
+				np.maximum(0, np.dot(w0, X) + b0)
+				
+			- Make sure the dimesions of array is atleadt 1d
+				 X1 = np.atleast_1d(x1)
+			
+			- To count the unique rows of a matrix with duplicated ids
+				unique_ids, counts = np.unique(data[:, 0], return_counts=True)#0th column is the first column id column
+				
+			- Compute the (Moore-Penrose) pseudo-inverse of a matrix
+				np.linalg.pinv(var) #A⁺ = (Aᵀ A)⁻¹ Aᵀ,
+				
+			- A.T * A = [a₁ * a₁ + a₂ * a₂ + ... + an * an] #sum of squares of the elements of a matrix
+			
+			- Dot product and matmul and transpose 
+				dot_product = np.matmul(a.T, b) # Assuming a and b are column vectors/row vectors (NumPy arrays of shape (n, 1))
+				# Or equivalently
+				dot_product = np.dot(a.T, b) #computes the sum of the element-wise product of the vectors, resulting in a scalar value
+				if x = [x1, x2, .., xn], then np.dot(x, x) = Σ xj^2
+				dot product a . b = a.T * b
+				
+			- Randomly shuffle X and Y synchoronously using random.permutation			
+				shuffled_idxs = np.random.permutation(X.shape[0]) # Randomly reorder the indices of examples
+				X_shuffled = X[shuffled_idxs] # shuffles X with shuffled indexes
+				Y_shuffled = Y[shuffle_idxs] #Y also get shuffles with same order of shuffled indexes
+				
+			- Randomly shuffle and select the different indices from the training examples			
+				randidx = np.random.permutation(X.shape[0]) # Randomly reorder the indices of examples
+				centroids = X[randidx[:K]] # Take the first K examples as centroids. Eg: K=3
+			
+			- Vectorized implementation of collaborative filtering cost function
+				def cofi_cost_func_v(X, W, b, Y, R, lambda_):
+					"""
+					Returns the cost for the content-based filtering
+					Vectorized for speed. Uses tensorflow operations to be compatible with custom training loop.
+					Args:
+					  X (ndarray (num_movies,num_features)): matrix of item features
+					  W (ndarray (num_users,num_features)) : matrix of user parameters
+					  b (ndarray (1, num_users)            : vector of user parameters
+					  Y (ndarray (num_movies,num_users)    : matrix of user ratings of movies
+					  R (ndarray (num_movies,num_users)    : matrix, where R(i, j) = 1 if the i-th movies was rated by the j-th user
+					  lambda_ (float): regularization parameter
+					Returns:
+					  J (float) : Cost
+					"""
+					j = (tf.linalg.matmul(X, tf.transpose(W)) + b - Y)*R
+					J = 0.5 * tf.reduce_sum(j**2) + (lambda_/2) * (tf.reduce_sum(X**2) + tf.reduce_sum(W**2))
+					return J
+				- Mean average from rating matrix y(user item matrix) and masking matrix R
+					#Mean Normalization for first user 0
+					# From the matrix, we can compute statistics like average rating.
+					mean = np.mean(Y[0, R[0, :].astype("bool")])
+					print(f"Average rating for movie 1 : {mean:0.3f} / 5" )
+				- Adding new user ratings to existing matrix and creating respective masked array R
+					#add the new user reviews to our original Y and R matrix first
+					Y = np.c_[my_ratings, Y]
+					R = np.c_[(my_ratings != 0).astype(int), R] #add 1 to the index value my_ratings is not zero. remaining values of my_ratings is already 0
+				- filter the movies with more than 20 ratings after getting the top 300 movies and then sort them by theor avg rating
+					filter = (movieList_df["number of ratings"] > 20) #gives true as value for the filter array when the condition is true else false, (Samesize as movieList_df[col])
+					sorted_idx = tf.argsort(my_predictions, direction="DESCENDING")
+					#add the predictions to the movieList_df
+					movieList_df["preds"] = my_predictions
+					movieList_df = movieList_df.reindex(columns=["preds", "mean rating", "number of ratings", "title"]) #adding the new column preds
+					movieList_df.loc[sorted_idx[:300]].loc[filter].sort_values(by="mean rating", ascending=False) 
+					
+			- np.tile()
+				np.tile(arrayormatrix, reps)# Construct an array by repeating A the number of times given
+				user_vec = np.array([[2, 3]]) #(1, 2)
+				num_items = 6
+				new_user_vecs = np.tile(user_vec, (num_items, 1)) #(6, 2)
+				
+			- np.any() to check the values based on condition in an array
+				if np.any(y_pu < 0) : 
+					print("Error, expected all positive predictions")
+					
+			- np.argsort() to sort the indexes based on value in the array
+				np.argsort(-y_pu, axis=0).reshape(-1).tolist() #negate to get largest rating first
+				
+			- .all() to check all the values are equal or not
+				(y_pred_model == y_pred_dot).all()
+				
+			- change/format all the values in a numpy array to a single datatype using tabulate
+				flist = [".0f", ".0f", ".1f", ".1f", ".1f", ".1f", ".1f", ".1f", ".1f", ".1f", ".1f", ".1f", ".1f", ".1f", ".1f", ".1f", ".1f"] #format list to specify each column width of a np matrix that is to be displayed
+				disp = [['[movie id]', '[ye ar]', '[ave rating]', 'Act ion', 'Adve nture', 'Anim ation', 'Chil dren', 'Com edy', 'Crime', 'Docum entary', 'Drama', 'Fan tasy', 'Hor ror', 'Mys tery', 'Rom ance', 'Sci -Fi', 'Thri ller']]
+				count = 0
+				maxcount = 5
+				for i in range(0, x_train.shape[0]):
+					if count == maxcount: break
+					count += 1
+					disp.append( [ 
+								  x_train[i, 0].astype(int),  
+								  x_train[i, 1].astype(int),   
+								  x_train[i, 2].astype(float), 
+								  *x_train[i, 3:].astype(float)
+								])
+				table = tabulate.tabulate(disp, tablefmt='html',headers="firstrow", floatfmt=flist, numalign='center')
+				
+			- Display the results as a table, applying formatting to all values in a numpy array, using zip_longest
+					# Display all floating point numbers rounded to 3 decimal places
+					from itertools import zip_longest
+					from statsmodels.iolib.table import SimpleTable
+					import numpy as np
+					action_labels = ["Do nothing", "Fire right engine", "Fire main engine", "Fire left engine",]					
+					column_headers = None # Do not use column headers
+					initial_state = np.random.rand(8, dtype="float")
+					next_state =np.random.rand(8)
+					reward = 1.6789075
+					done = False
+					action = np.array([0, 1, 0, 0]), next_state, reward, done
+					with np.printoptions(formatter={"float": "{:.3f}".format}):
+						table_info = [
+										("Initial State:", [f"{initial_state}"]),
+										("Action:", [f"{action_labels[action]}"]),
+										("Next State:", [f"{next_state}"]),
+										("Reward Received:", [f"{reward:.3f}"]),
+										("Episode Terminated:", [f"{done}"]),
+								]
+
+					# Generate table.
+					row_labels, data = zip_longest(*table_info)
+					table = SimpleTable(data, column_headers, row_labels)
+
+					return table
+			
+			- replace the values using for loop and apply()
+			    def matcher(df_val):
+					miss_list = ['Mlle.', 'Ms.', 'Mme.']
+					for val in miss_list:
+						if val.lower() == df_val.lower():
+						   df_val = 'Miss.'
+				df[colidx].apply(matcher)
+
+			- Replace the values using replace()
+				miss_list = ['Mlle.', 'Ms.', 'Mme.']
+				df = df.replace({colidx: {'Mlle.':'Miss.', 'Ms.':'Miss.',
+									'Mme.':'Miss.', 'Col.':'Major.',
+									'Capt.':'Major.', 'Don.' : 'Major',
+									'Major':'Major.'}
+												  })
+				df[colidx] = df[colidx].replace(
+				dict.fromkeys(['y', 'Planke,', 'Impe,', 'Gordon,', 'Melkebeke,'], 'Others'),
+				regex=True)
+			
+			- Replace the values from one value to other
+				- df.col.replace('valtobereplaced', 'value')
+					reviews.taster_twitter_handle.replace("@kerinokeefe", "@kerino")
+			- delete temporary variables
+				del var1, var2
+				
+			- np.squeeze to remove the dimensions and unpack the values from numpy array
+				print(f"Computed mean of the training set: {scaler.mean_.squeeze():.2f}")
+				print(f"Computed standard deviation of the training set: {scaler.scale_.squeeze():.2f}")
+				self.ax[0].plot(x_hat, f_wb, color=dlorange, lw=1, label=f"z = {np.squeeze(self.w):0.2f}x+({self.b:0.2f})")
+				
+			- Converting probabilities to categorical labels
+				- converts the probabilities to boolean 1 or 0 based on threshold 
+					threshold = 0.5
+					y_pred = (y_pred_probs >= threshold).astype(int) 
+					
+				- using np.where()
+					y_pred = np.where(y_pred_probs<0.5, 0, 1)
+				
+			- np.zeros() instead of appending while finding predictions
+				- w, b = 200, 100
+				 def compute_model_output(x, w, b): 
+					m = x.shape[0] #length of training examples array
+					f_wb = np.zeros(m)
+					for i in range(m):
+						f_wb[i] = w * x[i] + b
+					return f_wb
+				 tmp_f_wb = compute_model_output(x_train, w, b,)
+				 #plotting
+				 plt.plot(x_train, tmp_f_wb, c='b', label="Our Prediction") #our model prediction
+				 plt.scatter(x_train, y_train, marker='x', c='r', label='Actual Values') #actual training data
+				 plt.title("Housing Prices")
+				 plt.xlabel("Size (1000 sqft)")
+				 plt.ylabel("Price (in 1000s of dollars)")
+				 plt.legend()
+				 plt.show()
+				 
+			- np.zeros_like
+			    #andrew ng w1 cost function
+				w_range = np.array([200-200, 200+200]) #array([0, 400])
+				w_array = np.arange(*w_range, 5) #unpacking using * - gets 80 elements
+				#w_array = np.linspace(*w_range, 100)
+				cost = np.zeros_like(w_array)
+				tmp_b = 100
+				for i in range(len(w_array)):
+					tmp_w = w_array[i]
+					cost[i] = compute_cost(x_train, y_train, tmp_w, tmp_b) #func
+				
+				def mk_cost_lines(x, y, w, b, ax):
+					''' makes vertical cost lines'''
+					cstr = "cost = (1/m)*("
+					ctot = 0
+					label = 'cost for point'
+					addedbreak = False
+					for p in zip(x, y):
+						f_wb_p = w * p[0] + b
+						c_p = ((f_wb_p - p[1]) ** 2) / 2
+						c_p_txt = c_p
+						ax.vlines(p[0], p[1], f_wb_p, lw=3, color=dlpurple, ls='dotted', label=label)
+						label='' #just one
+						cxy = [p[0], p[1] + (f_wb_p - p[1]) / 2]
+						ax.annotate(f'{c_p_txt:0.0f}', xy=cxy, xycoords='data',color=dlpurple,
+							xytext=(5, 0), textcoords='offset points')
+						cstr += f"{c_p_txt:0.0f} +"
+						if len(cstr) > 38 and addedbreak is False:
+							cstr += "\n"
+							addedbreak = True
+						ctot += c_p
+					ctot = ctot / (len(x))
+					cstr = cstr[:-1] + f") = {ctot:0.0f}"
+					ax.text(0.15, 0.02, cstr, transform=ax.transAxes, color=dlpurple)
+					
+				@interact(w=(*w_range,10),continuous_update=False)
+				def func( w=150):
+					f_wb = np.dot(x_train, w) + tmp_b #we can also write as f_wb = x_train @ w + tmp_b
+					fig, ax = plt.subplots(1, 2, constrained_layout=True, figsize=(8,4))
+					fig.set_facecolor('#ffffff') #white
+					fig.canvas.toolbar_position = 'bottom'
+					mk_cost_lines(x_train, y_train, w, tmp_b, ax[0]) #func
+					plt_house_x(x_train, y_train, f_wb=f_wb, ax=ax[0]) #func
+					ax[1].plot(w_array, cost)
+					cur_cost = compute_cost(x_train, y_train, w, tmp_b)
+					ax[1].scatter(w,cur_cost, s=100, color=dldarkred, zorder= 10, label= f"cost at w={w}")
+					ax[1].hlines(cur_cost, ax[1].get_xlim()[0],w, lw=4, color=dlpurple, ls='dotted')
+					ax[1].vlines(w, ax[1].get_ylim()[0],cur_cost, lw=4, color=dlpurple, ls='dotted')
+					ax[1].set_title("Cost vs. w, (b fixed at 100)")
+					ax[1].set_ylabel('Cost')
+					ax[1].set_xlabel('w')
+					ax[1].legend(loc='upper center')
+					fig.suptitle(f"Minimize Cost: Current Cost = {cur_cost:0.0f}", fontsize=12)
+					plt.show()
+			
+			- Multivariate gaussian distribution probability density function calculation
+				def multivariate_gaussian(X, mu, var): #mu is mu values of all the features, var is variance of all the features
+					"""
+					Computes the probability density function of the examples X under the multivariate gaussian 
+					distribution with parameters mu and var. If var is a matrix, it is
+					treated as the covariance matrix. If var is a vector, it is treated
+					as the var values of the variances in each dimension (a diagonal
+					covariance matrix
+					"""
+					k = len(mu) #getting the number of features
+					if var.ndim == 1:
+						var = np.diag(var) #Extract a diagonal or construct a diagonal array
+					X = X - mu
+					p = (2* np.pi)**(-k/2) * np.linalg.det(var)**(-0.5) * np.exp(-0.5 * np.sum(np.matmul(X, np.linalg.pinv(var)) * X, axis=1))
+					return p
+			
+			- enumerate with zip for faster processing using enumarate iterator
+				#X , Y = large array, 
+				dispatches_args = enumerate(zip(X, Y))
+				for i, (x, y) in dispatches_args:
+					#do your operations
+		    - Logging
+				import logging
+				logging.getLogger("tensorflow").setLevel(logging.ERROR)
+				
+				# Set the logging level to INFO (other options: DEBUG, WARNING, ERROR, CRITICAL)
+				logging.basicConfig(level=logging.INFO)
+				# Optional: You can customize the log message format
+				# Example format: "[%(levelname)s] %(asctime)s - %(message)s"
+				# The above format will display logs like: "[INFO] 2023-07-19 12:34:56,789 - This is an info message"
+				logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(asctime)s - %(message)s")
+				#when u want to save the log file to a file
+				logging.basicConfig(filename="app.log", level=logging.INFO, format="[%(levelname)s] %(asctime)s - %(message)s") 
+				# Logging messages of different levels
+				logging.debug("This is a debug message")
+				logging.info("This is an info message")
+				logging.warning("This is a warning message")
+				logging.error("This is an error message")
+				logging.critical("This is a critical message")
+				
+			- Warning filter
+				import warnings
+				warnings.filterwarnings(action="ignore", category=FutureWarning)
+				
+				import warnings
+				with warnings.catch_warnings():  # suppress warnings
+					warnings.simplefilter("ignore")
+			    
+			- for debug and display widgets, actions, events or button click output error
+				from ipywidgets import Output
+				output = Output() # sends hidden error messages to display when using widgets
+				display(output) #write these 3 lines in the previous cell
+				@output.capture() #write this decorator before the function def statement that you want to capture error
+			
+			- Submission to the kaggle after sorting
+				final_result = pd.DataFrame(test_inp['PassengerId'])
+				final_result['Survived'] = Y_pred_rf_cv
+				final_result = final_result.sort_values(by=['PassengerId'])
+				final_result
+				
+			- Save to csv file
+				final_result.to_csv('TitanicSurvivalPrediction.csv', index=False)
+				
+			- timer with timeit
+				- %%timeit
+				- from timeit import default_timer as timer #same as time.perf_counter()
+	
+	- NLP Preprocessing
+		
+		- Tokenization
+			- Word tokenization
+				import nltk
+				from nltk.tokenize import word_tokenize
+				sentence = "hi there.hello girl"
+				tokens = word_tokenize(sentence)
+				print(tokens) #['hi', 'there', '.', 'hello', 'girl']
+				word_tokenize('won’t') #['won', '’', 't'] not appropriate
+				
+			- WordPunctTokenizer to handle punctuations
+				from nltk.tokenize import WordPunctTokenizer
+				tokenizer = WordPunctTokenizer()
+				tokenizer.tokenize(" I can't allow you to go home early") #['I', 'can', "'", 't', 'allow', 'you', 'to', 'go', 'home', 'early']
+				
+			- Sentence tokenization
+				import nltk
+				from nltk.tokenize import sent_tokenize
+				sentence = "hi there.hello girl"
+				tokens = nltk.sent_tokenize(sentence)
+				print(tokens) #['hi there.', 'hello girl']
+				
+			- Tokenization using regular expressions
+				(customizable tokenisation, preferable for faster execution)
+				import nltk
+				from nltk.tokenize import RegexpTokenizer
+				tokenizer = RegexpTokenizer("[\w']+") 
+				#matching alphanumeric tokens plus single quotes so that we don’t split contractions like “won’t”
+				tokenizer.tokenize("won't is a contraction.") #["won't", 'is', 'a', 'contraction']
+				tokenizer.tokenize("can't is a contraction.") #["can't", 'is', 'a', 'contraction']
+				
+				import nltk
+				from nltk.tokenize import RegexpTokenizer
+				tokenizer = RegexpTokenizer('/s+' , gaps = True) #tokenize on whitespace, 
+				tokenizer.tokenize("won't is a contraction.") #["won't is a contraction."]
+				#["won't", 'is', 'a', 'contraction']		
+				# gaps = True means the pattern is going to identify the gaps to tokenize on.
+                
+				import nltk
+				from nltk.tokenize import RegexpTokenizer
+				tokenizer = RegexpTokenizer('/s+' , gaps = False)
+				# if we will use gaps = False parameter then the pattern would be used to identify the tokens
+				tokenizer.tokenize("won't is a contraction.") #[ ]
+				
+			- Training own sentence tokenizer
+				NLTK’s default tokenizer is basically a general-purpose tokenizer.
+				Although it works very well but it may not be a good choice for nonstandard text,
+				or for a text that is having a unique formatting.
+				To tokenize such text and get best results, we should train our own sentence tokenizer
+					from nltk.tokenize import PunktSentenceTokenizer
+					from nltk.corpus import webtext
+					text = webtext.raw('E:\Learning\ML\Learning Practice\sampletext.txt') #getting the raw text
+					sent_tokenizer = PunktSentenceTokenizer(text)
+					sents_1 = sent_tokenizer.tokenize(text)
+					print(sents_1)
+					print(sents_1[0])
+					
+		- Stemming
+			It is the process of producing morphological variants of a root/base word.
+			Stemming is a technique used to extract the base form of the words by removing affixes from them.
+			Reduce words to their base/root form. eg: “chocolates”, “chocolatey”, “choco” to the root word, “chocolate”
+			“retrieval”, “retrieved”, “retrieves” reduce to the stem “retrieve”. 
+			The input to the stemmer is tokenized words.
+			Why stemming? - "normalize text and make it easier to process" 
+			Search engines use stemming for indexing the words.
+			That’s why rather than storing all forms of a word, a search engine can store only the stems. 
+			In this way, stemming reduces the size of the index and increases retrieval accuracy
+			but could suffer with info loss, understemming, overstemming
+			
+			- PorterStemmer, LancasterStemmer
+				import nltk
+				from nltk.stem import PorterStemmer, LancasterStemmer
+				word_stemmer = PorterStemmer() #LancasterStemmer()
+				word_stemmer.stem('chocolates')	#chocol
+			
+			- SnowballStemmer	
+				It supports 15 non-English languages. In order to use this steaming class, 
+				we need to create an instance with the name of the language we are using and then call the stem() method. 
+					import nltk
+					from nltk.stem import SnowballStemmer
+					print(SnowballStemmer.languages)
+					French_stemmer = SnowballStemmer('french')
+					French_stemmer.stem('Bonjoura') #bonjour
+			
+			- Regular expression Stemmer
+				With the help of this stemming algorithm, we can construct our own stemmer.
+				It basically takes a single regular expression and removes any prefix or suffix that matches the expression
+					import nltk
+					from nltk.stem import RegexpStemmer
+					Reg_stemmer = RegexpStemmer('ing')
+					Reg_stemmer.stem('ingeat') #eat
+					
+		- Lemmatization
+			Lemmatization technique is like stemming. The output we will get after lemmatization is called ‘lemma’, which is a root word rather than root stem, the output of stemming.
+			After lemmatization, we will be getting a valid word. In simple words, stemming technique only looks at the form of the word whereas lemmatization technique looks at the meaning of the word. 
+			It means after applying lemmatization, we will always get a valid word.
+				import nltk
+				from nltk.stem import WordNetLemmatizer
+				lemmatizer = WordNetLemmatizer()
+				lemmatizer.lemmatize('books') #book
+        
+			- wordnet for lemmatization and word look up
+				
+		- Stop word removal 
+			from nltk.corpus import stopwords
+			stopwords.fileids() #gets the supported languages
+			english_stops = set(stopwords.words('english'))
+			words = ['I', 'am', 'a', 'writer']
+			[word for word in words if word not in english_stops] #['I', 'writer']
+
+		- Vectorization
+			- TF-IDF
+			- WordEmbedding
+				- BOW
+				- CBOW
+				- Word2Vec
+				- GloVe
+				
+--------------------------------------------------------------------
+- Spot check Algorithms
+	(Models comparison and selection (tabular - classical ML, imagedata - CNN, text - classical NLP/RNN)- algorithms find the decision boundary)
+	- Supervised
+		- from sklearn.dummy import
+			- DummyClassifier, DummyRegressor
+		- from sklearn.linear_model import
+			- LogisticRegression(solver='liblinear'), LinearRegression(), LinearDiscriminantAnalysis(), Perceptron, Lasso
+		- from sklearn.neighbors import
+			- KNeighborsClassifier(), KNeighborsRegressor()
+		- from sklearn.svm import
+			- LinearSVC(), LinearSVR(), SVC(), SVR(), clf.support_vectors_, clf.support_, clf.n_support_
+				from sklearn.datasets import load_breast_cancer
+				import matplotlib.pyplot as plt
+				from sklearn.inspection import DecisionBoundaryDisplay
+				from sklearn.svm import SVC
+				cancer = load_breast_cancer()
+				X = cancer.data[:, :2]
+				y = cancer.target
+				svm = SVC(kernel="rbf", gamma=0.5, C=1.0) #kernel for non linearly separable data
+				svm.fit(X, y)
+				# Plot Decision Boundary
+				DecisionBoundaryDisplay.from_estimator(svm, X, response_method="predict", cmap=plt.cm.Spectral, alpha=0.8, xlabel=cancer.feature_names[0], ylabel=cancer.feature_names[1],) #cmap=plt.cm.RdBu, cmap=plt.cm.RdYlBu gives colors in red,yellow,blue
+				plt.scatter(X[:, 0], X[:, 1], c=y, s=20, edgecolors="k")
+				plt.show()
+		- from sklearn.tree import
+			- DecisionTreeClassifier(), DecisionTreeRegressor(), clf.feature_importances_
+		- from sklearn.naive_bayes import
+			- MultinomialNB(), GaussianNB(), 
+		- from sklearn.neural_network import
+			- MLPClassifier()
+		
+		- Ensembles
+			from sklearn.ensemble import
+			- RandomForestClassifier(), RandomForestRegressor(), clf.feature_importances_
+				model_rf = RandomForestClassifier(n_estimators=100, max_depth=4, min_samples_split=30, n_jobs=-1, random_state=RANDOM_STATE)
+				model_rf.fit(X_train, y_train)
+			- GradientBoostingClassifier(), GradientBoostingRegressor(learning_rate=0.01, n_estimators=500, max_depth=4, min_samples_split=5, subsample=0.8) #subsample < 1.0 makes it stochastic gradient boosting
+			- AdaBoostClassifier(), AdaBoostRegressor()
+			- from xgboost import XGBRegressor, XGBClassifier
+				model_XGB = XGBClassifier(n_estimators=500, learning_rate=0.1, verbosity=1, random_state=RANDOM_STATE)
+				model_XGB.fit(X_train_fit, y_train_fit, eval_set=[(X_val, y_val)], early_stopping_rounds=50)
+				print(model_XGB.best_iteration)
+			- ExtraTreesClassifier(), ExtraTreesRegressor()
+	
+	- Unsupervised (Image Segmentation, Market Segmentation, Customer Segmentation, Geneexpression analysis, Anomaly(outlier) detection, Data compression, Association)
+		- Clustering (Segmentations/groupings of data into clusters)
+			- Centroid/Prototype Based Clustering
+				- KMeans
+				- KMediods
+				- Fuzzy C Means
+				- Expectation Maximization (EM) Algorithm
+				- Mini-Batch K-means
+			- Density based clustering
+				- DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
+				- OPTICS (Ordering points to identify the clustering structure)
+				- Mean shift (non parametric density based)
+				- Spectral Clustering
+			- Hierarchical Clustering
+				- Agglomerative (bottom up)
+					- Single Linkage, Complete Linkage, Average Linkage, Median Linkage, Centroid Linkage
+				- Divisive (top down)
+					- Divisive (DIANA)
+			- Distribution based clustering
+				- Kernel Density Estimation (KDE)
+				- Gaussian Mixture Models
+			- Grid Based Clustering
+				- Clique
+				- Sting
+			
+			- Clustering Evaluations
+				- Cost function evaluation
+				- Silhouette coefficient
+				- Dunn indicator
+			- Clustering Distance Measures:
+				- Minkowski distance
+				- Standardized Euclidean distance
+				- Cosine distance
+				- Pearson correlation distance
+				- Mahalanobis distance
+		
+		- Anamoly Detection (Performs "Density estimation" to find out the unlikely examples => anamolies)
+			- Gaussian Mixture Models
+			- Isolation Forest
+			- One-Class SVM (Support Vector Machine)
+			- Local Outlier Factor (LOF)
+			- k-Nearest Neighbors (k-NN)
+			- Autoencoders
+			- Density-Based Spatial Clustering of Applications with Noise (DBSCAN)
+			- Histogram-based Outlier Detection (HBOS)
+			- Robust Random Cut Forest (RRCF)
+			- Mahalanobis Distance
+		
+		- Dimensionality Reduction(for visualization purpose mostly)
+			- Principle Component Analysis PCA
+				from sklearn.decomposition import PCA
+			- Singular value decomposition
+	
+		- Recommender Systems
+			- Collaborative Filtering
+			- Content Based Filtering
+		
+		- Reinforcement Learning
+		
+		- Association analysis ( identify interesting relationships, correlations, or associations among items in a dataset)
+			( market basket analysis, support, confidence, lift, lattice graph)
+			- Apriori algorithm
+			- Eclat algorithm
+			- FP growth
+	
+	- Semi-supervised
+		- Self-Training (Pseudo-Labeling)
+		- Semi-Supervised Support Vector Machines (S3VM) (extension of SVM to handle unlabelled data)
+		- Graph-Based Methods (Label Propagation)
+		- Entropy Minimization
+		- Generative Models (Semi-Supervised Variational Autoencoders)
+			-
+	- Deep Learning
+		- Artificial Neural Networks (ANN's)
+			- Multi Layer Perceptron (MLP) or Feed Forward Neural Networks or Deep Feed Forward Networks (Fully connected Dense layer), Deep Neural Networks
+			- Convolution Neural Networks - for images (NN with convolution layer)
+				- padding
+					- X_pad = np.pad(X, ((0,0), (pad, pad), (pad, pad), (0,0)), mode="constant", constant_values = (0,0)) #X - (m, n_H, n_W, n_C)
+				- Pretrained CNN's (pre-trained models are found in transfer learning, feature extraction, and classification)
+					- LeNet (LeNet-5) (5 hidden layers)(about 60 k params)(used sigmoid/tanhn as activations)
+						- ppr - 
+					- AlexNet (deeper than LeNet -5)(60 million params)(used relu as activations)
+						- ppr - 
+					- VGG Net (VGG-16) (16 layers has trainable params)(138 million params)
+						- ppr-Very Deep Convolutional Networks for Large-Scale Image Recognition
+					- ResNet (ResNet50) - Residual Neural Network - 152 hidden layers (uses skip connections)
+					- Inception Net (Inceptionv3 (GoogLeNet))(uses 1D conv filters to shrink channels)
+					- DenseNet (Densenet-121) - Densely Connected Convolutional Networks (resnet + 1d conv)
+					- Mobile Nets (Depthwise Separable Nets)
+					- Xception Net
+					- EfficientNet
+					- RCNN, Faster RCNN (Region-Based CNN)
+					- YOLO (You Only Look Once)
+			- Sequential Neural Networks
+				- RNN
+				- LSTM
+				- GRU
+				- Transformers
+				- NLP, speech data
+			- NLP algorithms - for textual data (nltk, word_tokenize or sent_tokenize, one_hot encoding, word2vec embedding, model learning)
+				- Sentence Segmentation, Tokenization, Stemming, Lemmatization, Stop word analysis, Part-of-speech (POS) tagging, Named entity recognition, summarization, creating unigrams, bigrams, trigrams, TfidfVectorizer or word2vec word embedding
+				- Language models
+					- Probabilistic Language Models
+						- Naive Bayes
+						- Continuous bag-of-words (CBOW) Word2Vec model 
+						- Skip-Gram Word2Vec model (word2vec for word embeddings)
+						- Glove - Global Vectors for Word Representation
+						- Doc2Vec
+					- Neural network-based modern language models
+						- Recurrent Neural Networks (RNN)
+							- Long short-term memory (LSTM)
+							- Gated recurrent unit (GRU) cell based network
+							- Bidirectional LSTM
+						- Transformers (with attention)
+							- Pretrained
+								- BERT (Bidirectional Encoder Representations from Transformers)
+								- GPT-1 , GPT-4, GPT-4 (Generative Pre-trained Transformer)
+								- RoBERTa
+								- XLNet
+								- ELECTRA
+								- ALBERT (A Lite BERT for Self-supervised Learning of Language Representations)
+								- T5
+								- BART
+								- PEGAUSUS
+					   (Note: Transfer Learning - Pre-trained neural network models are just models trained on one task and then used in a different task eg: GloVe)
+			
+			- Generative models 
+				- Auto Encoders
+				- GAN's - Generative Adversarial Networks
+				- Variational Auto Encoders (VAE - Applies Variational Inference to the Autoencoder)
+				- RBM - Restricted Boltzmann Machine
+				- Deep Belief Network (DBN)
+				
+			- Probabilistic Models
+				- Gaussian Naive Bayes
+				- Hidden Markov Models
+				- Gaussian Mixture Models (GMMs) 
+					(often used for clustering, density estimation, and image segmentation)
+				- Bayesian Networks (Directed Probabilistic Models)
+				- Markov Random Fields (Undirected Probabilistic Models)
+				- Probabilistic Latent Semantic Analysis (PLSA) 
+					(used for dimensionality reduction and topic modeling in text data)
+				- Latent Dirichlet Allocation (LDA) 
+					A generative probabilistic model used for topic modeling and discovering hidden topics in text data
+				- Expectation-Maximization (EM) Algorithm
+				- Conditional Random Fields (CRFs)
+				- Variational Inference
+				- Monte Carlo Methods
+					- Markov Chain Monte Carlo (MCMC)
+					- Variational Monte Carlo (VMC)
+				- Particle Filter
+						
+					
+				#Neural network using keral sequential model
+			    from tensorflow.keras.models import Sequential
+				from tensorflow.keras.layers import Dense, Embedding, Input
+				from tensorflow.keras.optimizers import Adam
+				from tensorflow.keras import Model
+				from tensorflow.keras.layers import concatenate
+				from tensorflow.keras.utils import plot_model
+				from tensorflow import cast, int32
+
+				model = Sequential()
+				model.add(Dense(12, input_dim=x_train.shape[1], activation='relu'))
+				model.add(Dense(24, activation='relu', name="layer1"))
+				model.add(Dense(12, activation='relu'))
+				model.add(Dense(8, activation='relu'))
+				model.add(Dense(1, activation='sigmoid')) 
+				#model.add(Dense(10, activation='softmax')) for categorical classification
+				model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']) 
+				#categorical_crossentropy for categorical classification
+				model.fit(x_train, y_train, epochs=100, batch_size=50, verbose=2)
+				training_accuracy = model.evaluate(x_train, y_train, verbose=0)
+				y_pred = model.predict(x_test) 
+				#model.predict will output a matrix in which each row is the probability of that input to be in class 1 eg: [0.67318296]
+				print(y_pred[0])
+				#hidden_layer = model.get_layer("layer1")
+				#print(hidden_layer.get_weights()) #return array of weights
+				#print(model.layers)
+				#print(model.layers[2].weights) #return tensor of weights
+				#hidden_layer.set_weights([set_w, set_b])
+				#print(model.layer1.get_weights())
+				#model.layer1.set_weights([set_w, set_b]) #we can also set weights manually.
+				# make a binary prediction from probabilities
+				binary_preds = cast(y_pred >= 0.7, int32) #0.7 as threshold for class 1 #[[0] [0] [1]]
+				test_accuracy = accuracy_score(y_test, binary_preds)
+				plot_model(model, show_shapes=True, to_file='embeddings.png')
+				
+			#Keras model using function api
+				num_outputs = 32
+				num_user_features = X_train.shape[1]
+				tf.random.set_seed(1)
+				user_NN = tf.keras.models.Sequential([
+					### START CODE HERE ###   
+					tf.keras.layers.Dense(256, activation='relu'),
+					tf.keras.layers.Dense(128, activation='relu'),
+					tf.keras.layers.Dense(num_outputs, activation='linear'),
+					### END CODE HERE ###  
+				], name="UserNetwork")
+
+				item_NN = tf.keras.models.Sequential([
+					### START CODE HERE ###     
+					tf.keras.layers.Dense(256, activation='relu'),
+					tf.keras.layers.Dense(128, activation='relu'),
+					tf.keras.layers.Dense(num_outputs, activation='linear'),
+					### END CODE HERE ###  
+				])
+
+				# create the user input and point to the base network
+				input_user = tf.keras.layers.Input(shape=(num_user_features))
+				vu = user_NN(input_user)
+				vu = tf.linalg.l2_normalize(vu, axis=1)
+
+				# create the item input and point to the base network
+				input_item = tf.keras.layers.Input(shape=(num_item_features))
+				vm = item_NN(input_item)
+				vm = tf.linalg.l2_normalize(vm, axis=1)
+
+				# compute the dot product of the two vectors vu and vm
+				output = tf.keras.layers.Dot(axes=1)([vu, vm])
+
+				# specify the inputs and output of the model
+				model = Model([input_user, input_item], output)
+
+				model.summary()
+				print(UserNetwork.get_weights()) #to print the weight parameters of the layer
+--------------------------------------------------------------------
+- Choosing the Optimizers 
+	(To find out the best parameters and the objective of maximizing or minimizing the cost function)
+	- Gradient Descent (preprocessing - normalization)
+		- Stochastic Gradient Descent (SGD)
+		- Mini Batch Stochastic Gradient Descent (MB-SGD)
+		- SGD with momentum
+	- ADAM (Adaptive Moment Estimation)
+	- Adaptive Gradient Descent(AdaGrad)
+	- AdaDelta
+	- RMSProp
+	
+--------------------------------------------------------------------
+- Choosing the Loss function
+	- For Classification
+		- Categorical Cross Entropy for categorical classification
+			- model.compile(loss='binary_crossentropy'
+		
+		- Binary Cross Entropy for binary classfication
+			- model.compile(loss='binary_crossentropy'
+			
+	- For Regression
+		- Negative Mean Squared Error for regression
+			mse = cross_val_score(regressor, x_train, y_train, cv=k_fold_cv, scoring=scoring)
+		
+		- Root Mean squared error for regression
+		
+		- Mean Absolute error (MAE)
+		
+--------------------------------------------------------------------
+- Choosing the evaluation metrics
+
+	- Accuracy 
+		(not for class imbalances)
+		accuracy = cross_val_score(clf, x_train, y_train, cv=kfold_cv, scoring='accuracy')
+		accuracy_score(y_test, y_pred)
+		accuracy_score = accuracy_score(y_test, y_pred) #from sklearn.metrics
+
+	- Negative Log Likelihood
+		log_likelihood_score = cross_val_score(clf, x_train, y_train,cv=kfold_cv, scoring='neg_log_loss')
+
+	- Confusion Matrix
+		y_pred = clf.predict(x_test)
+		cm = confusion_matrix(y_test, y_pred)
+		ConfusionMatrixDisplay(cm).plot()
+
+	- classification report
+		cls_report = classification_report(y_test, y_pred, target_names=['0-No', '1-Yes'])
+	
+	- F1 score
+		f1_score = cross_val_score(clf, x_train, y_train, cv=kfold_cv, scoring='f1')
+		f1_score = f1_score(y_test, y_pred) #from sklearn.metrics
+		
+	- PrecisionRecallDisplay
+	
+	- auc
+	
+--------------------------------------------------------------------
+- Model Training and Evaluation
+	- Training
+		- Resampling (cross validation helps to find out how the algorithm is performing or overfitting)
+			- k_fold_cv = KFold(n_splits=5, shuffle=True, random_state=0)
+			  k_fold_cv_score = cross_val_score(clf, x_train, Y_train, cv=k_fold_cv, scoring='accuracy', njobs=-1, error_score='raise', verbose=0)
+			  print(k_fold_cv_score.mean(), k_fold_cv_score.std())
+			
+			- stratified_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0, scoring='neg_log_loss') #to be opted for class imbalances
+			  stratified_cv_score = cross_val_score(clf, x_train, Y_train, cv=stratified_cv)
+			  print(stratified_cv_score.mean(), stratified_cv_score.std())
+			
+			- loocv = LeaveOneOut()
+			  loocv_score = cross_val_score(clf, x_train, Y_train, cv=loocv, scoring='f1')
+			  print(loocv_score.mean(), loocv_score.std())
+			  
+			- RepeatedKFold_cv = RepeatedKFold(n_repeats=3, n_splits=10, random_state=0)
+			  scores = cross_val_score(pipe, x_train, y_train, cv=cv, error_score='raise', scoring='neg_mean_absolute_error')
+			
+			- StratifiedShuffleSplit() #to be opted for class imbalances
+		
+		- Fitting the whole training data
+			- clf.fit(x_train, y_train)
+			- clf.score(x_train , y_train)
+			
+	- Validating
+			- scaler.transform(x_val)
+			- clf.score(x_val, y_val) or clf.predict(x_val, y_val)
+	- Testing
+			- scaler.transform(x_test)
+			- clf.predict(x_test) or clf.score(x_test, y_test) or clf.predict(x_test, y_test)
+	
+----------------------------------------------------------------------
+- HyperParameter Tuning (using cross validation set) 
+	(degree, network architecture, regularization parameter, min_samples_split, max_depth, n_estimators, learning_rate)
+	(To improve accuracy or model scores, select best hyperparameters, best estimators (can be done before actual training))
+	- GridSearchCV()
+		model = LogisticRegression()
+		params = {'penalty': ['l1', 'l2'], 'C': [1,10], 'solver' : ['liblinear'], 'multi_class': ['auto', 'ovr']}
+        grid = GridSearchCV(estimator=model, param_grid=params, refit=True, cv=10, error_score='raise')
+		clf = grid.fit(x_train, y_train)
+		y_pred = clf.predict(x_test)
+		print(sorted(clf.cv_results_), clf.best_estimator_, clf.best_score_, clf.best_params_)
+		print(grid.best_estimator_, grid.best_score_)
+	
+	- RandomSearchCV
+		random_grid = RandomizedSearchCV(estimator=model, param_distributions=params, refit=True, error_score='raise')
+    
+	- Using Ensembles
+		adamodel = AdaBoostClassifier(n_estimators=300, learning_rate=0.01)
+		ada_clf = adamodel.fit(x_train, y_train)
+		kfold = KFold(n_splits=10, shuffle=True, random_state=0)
+		adamodel_score = cross_val_score(ada_clf, x_train, y_train, cv=kfold, scoring='accuracy')
+		print("AdaBoosting classifier score: %.2f" % adamodel_score.mean())
+
+----------------------------------------------------------------------
+
+- Plot models
+	- graphviz dot graph Decision tree
+		from sklearn.tree import export_graphviz
+		import graphviz
+		export_graphviz(tree, out_file="mytree.dot", feature_names = names[0:13], impurity=False, filled=True)
+		with open("mytree.dot") as f:
+			dot_graph = f.read()
+		graphviz.Source(dot_graph)
+		#dot -Tpng tree.dot -o outfile.png #in terminal too save dot file as png
+		
+	- Plot the keras neural network Sequential model
+		from keras.utils import plot_model
+		plot_model(model, show_shapes=True, to_file='embeddings.png')
+----------------------------------------------------------------------
+- Saving the model as pickle file and loading the saved model pickle
+	- pkl.dump(rfmodel, open('randomforestmdl.sav', 'wb'))
+	- loaded_model = pkl.load(open('randomforestmdl.sav', 'rb'))
+	
+	
