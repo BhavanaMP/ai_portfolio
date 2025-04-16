@@ -1,0 +1,17 @@
+torch
+transformers
+sentence-transformers
+scikit-learn
+pandas
+numpy
+beautifulsoup4
+scrapy
+tweepy
+matplotlib
+seaborn
+shap
+tqdm
+dotenv
+requests
+torchvision
+streamlit

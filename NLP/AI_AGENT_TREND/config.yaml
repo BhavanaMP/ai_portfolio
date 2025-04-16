@@ -1,0 +1,13 @@
+sources:
+  websites:
+    - "https://www.theverge.com/artificial-intelligence"
+    - "https://arxiv.org/list/cs.AI/recent"
+  twitter_queries:
+    - "AI agents"
+    - "ChatGPT vs Gemini"
+  review_api: "https://api.example.com/reviews"
+  twitter_api_keys:
+    api_key: "YOUR_TWITTER_API_KEY"
+    api_secret: "YOUR_TWITTER_API_SECRET"
+    access_token: "YOUR_ACCESS_TOKEN"
+    access_secret: "YOUR_ACCESS_SECRET"
