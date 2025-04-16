@@ -1,0 +1,90 @@
+# --is_train True --encoder "tu-convnext_small" --decoder "DeepLabV3Plus" --enable_mcdropout True --enable_ohem True
+# --is_train True --encoder "mit_b3" --decoder "FPN" --enable_mcdropout True --enable_ohem True
+# --is_train True --enable_mcdropout True --enable_ohem True --class_weights "balanced,0.4407,0.6678,0.0829,0.46035,0.47325,0.0408,11.2911,0.15825,2.5676,1.60125,0.0520,0.10755,0.1232" #balanced wgts + attention
+
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_clear-dawn-108.pt" --enable_mcdropout True
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_polished-puddle-132.pt" --is_predict True --is_robustness_check True --enable_mcdropout True
+
+#--run_post_hoc_calib True --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_stilted-wind-99.pt" --models_names resnet101 Unet mit_b3 FPN
+
+# --hf_test_path "BhavanaMalla/railsem19_test_split_original" --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_rich-paper-100.pt" --enable_mcdropout True
+# --hf_test_path "BhavanaMalla/railsem19_test_split_ColorJitter"
+# --hf_test_path "BhavanaMalla/railsem19_test_split_Fog"
+# --hf_test_path "BhavanaMalla/railsem19_test_split_Rain"
+# --hf_test_path "BhavanaMalla/railsem19_test_split_Snow"
+# --hf_test_path "BhavanaMalla/railsem19_test_split_Sunflare"
+# --hf_test_path "BhavanaMalla/railsem19_test_split_Shadow"
+# --hf_test_path "BhavanaMalla/railsem19_test_split_salt_and_pepper"
+# --hf_test_path "BhavanaMalla/railsem19_test_split_Blur" --
+
+
+# --models_names resnet101 Unet mit_b3 FPN
+##### ------------------------UNET+R101 --------------------------
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_clear-dawn-108.pt" --enable_mcdropout True - ur101baseline -200_10 #10doesnt apply for baseline
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_copper-wind-106.pt" --enable_mcdropout True - ur101mcdrpout -200_10
+
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_stilted-wind-99.pt" --enable_mcdropout True - ur101baseline -50_5 #5 doesnt apply for baseline -- roubustness done
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_cool-cherry-101.pt" --enable_mcdropout True - ur101baseline+customclassweighting -50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_lunar-lake-102.pt" --enable_mcdropout True - ur101baseline+balancedclassweighting+noattn - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_soft-sky-112.pt" --enable_mcdropout True - ur101baseline+balancedclassweighting+attn - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_dark-thunder-134.pt" --enable_mcdropout True - ur101baseline+ohem - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_autumn-wave-141.pt" --enable_mcdropout True - ur101baseline+ohem+IW - 50_5
+
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints_calib/model_uncertain_stilted-wind-99.pt" --enable_mcdropout True --use_tempsscaling True - ur101baseline+ts_50epch - 50_5
+
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_rich-paper-100.pt" --enable_mcdropout True - ur101mcdropout -50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_misunderstood-fog-137.pt" --enable_mcdropout True - ur101mcdropout+ohem - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_rich-fog-116.pt" --enable_mcdropout True - ur101mcdropout+balancedclassweighting+noattn - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_astral-violet-117.pt" --enable_mcdropout True - ur101mcdropout+balancedclassweighting+attn - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_woven-brook-128.pt" --enable_mcdropout True - ur101mcdropout+balancedweighting+attn+ohem - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_visionary-fog-122.pt" --enable_mcdropout True - ur101mcdropout_predunc+entropymeanpreds - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_iconic-plant-138.pt" --enable_mcdropout True - ur101mcdropout+entropymeanpreds+ohem
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_flowing-haze-123.pt" --enable_mcdropout True - ur101mcdropout_predunc+entropymeanpreds+balancedweighting+attn - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_efficient-voice-129.pt" --enable_mcdropout True - ur101mcdropout_predunc+entropymeanpreds+balancedweighting+attn+ohem - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_hearty-silence-119.pt" --enable_mcdropout True - ur101mcdropout+"un"normalizedentropydecomposition - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_light-lightsaber-120.pt" --enable_mcdropout True - ur101mcdropout+normalizedentropydecomposition - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_divine-plasma-140.pt" --enable_mcdropout True - ur101mcdropout+normalizedentropydecomposition+ohem
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_dark-energy-121.pt" --enable_mcdropout True - ur101mcdropout+normalizedentropydecomposition+balancedweighting+attn - 50_5
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_polished-puddle-132.pt" --enable_mcdropout True - ur101mcdropout+normalizedentropydecomposition+balancedweighting+attn+ohem - 50_5
+
+##### ------------------------FPN+MITB3 --------------------------
+# --is_train True --encoder "mit_b3" --decoder "FPN" --enable_mcdropout True --enable_ohem True # training
+
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_fpn_mitb3_mild-elevator-13.pt" --models_names mit_b3 FPN --enable_mcdropout True - baseline - 50_5  # model_fpn_mitb3_leafy-grass-6.pt
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_fpn_mitb3_glorious-sky-14.pt" --models_names mit_b3 FPN --enable_mcdropout True - baseline+ohem - 50_5 # model_fpn_mitb3_leafy-oath-8.pt
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_FPNMITB3_MCD_railsem19_xknywnam_.pt" --models_names mit_b3 FPN --enable_mcdropout True - MCD(usual predunc)
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_FPNMITB3_MCD_OHEM_railsem19_35cyljwj_.pt" --models_names mit_b3 FPN --enable_mcdropout True - MCD+OHEM(usual predunc)
+
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_fpn_mitb3_upbeat-water-10.pt"  --models_names mit_b3 FPN--enable_mcdropout True - mcdropout(with predunc+entropy) - 50_5  # model_fpn_mitb3_helpful-oath-7.pt
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_fpn_mitb3_comic-capybara-12.pt" --models_names mit_b3 FPN --enable_mcdropout True - mcdropout+ohem(with predunc+entropy) - 50_5 # model_fpn_mitb3_blooming-lake-9.pt
+
+# --hf_test_path "BhavanaMalla/railsem19_test_split_ColorJitter" --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_fpn_mitb3_leafy-grass-6.pt" --models_names mit_b3 FPN --enable_mcdropout True
+
+##### ------------------------DeepLabV3Plus+CONVNEXT --------------------------
+# --is_train True --encoder "tu-convnext_small" --decoder "DeepLabV3Plus" --enable_mcdropout True --enable_ohem True # training
+
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_DLV3Plus_CONVNEXT_small_baseline_railsem19_sm7tn2ne_.pt" --models_names tu-convnext_small DeepLabV3Plus --enable_mcdropout True - baseline - 50_5  
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_DLV3Plus_CONVNEXT_small_baseline_OHEM_railsem19_450j5ytb_.pt" --models_names tu-convnext_small DeepLabV3Plus --enable_mcdropout True - baseline+OHEM
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_DLV3Plus_CONVNEXT_small_MCD_railsem19_7gv5bf8a_.pt" --models_names tu-convnext_small3 DeepLabV3Plus --enable_mcdropout True - MCD - 50_5 (usual predunc)
+# --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_DLV3Plus_CONVNEXT_small_MCD_OHEM_railsem19_bc1tiwvv_.pt" --models_names tu-convnext_small DeepLabV3Plus --enable_mcdropout True - MCD+OHEM(usual predunc)
+
+# ------------------------------------------------------------------------------------------------------------
+# --run_post_hoc_calib True --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_stilted-wind-99.pt" --models_names "resnet101 Unet"
+
+# --is_predict True --predict_img_path "/nfs1/malla/Thesis_copy/datasets/railsem19/Test_Images/rs00009.jpg" --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_stilted-wind-99.pt" --enable_mcdropout True
+# --is_predict True --is_robustness_check True --models_paths "/nfs1/malla/Thesis_copy/fpn_checkpoints/model_uncertain_stilted-wind-99.pt" --enable_mcdropout True
+# --is_train True --class_weights "balanced,0.2938,0.4452,0.0829,0.3069,0.3155,0.0408,7.5274,0.1055,2.5676,1.0675,0.0520,0.0717,0.1232"  ## category balanced weights
+# --is_train True --class_weights "balanced,1.5,1.5,0.5,1.5,1.5,0.5,1.5,1.5,1.5,1.5,0.5,1.5,0.5"  #custom class weighting
+# --is_train True --class_weights "balanced,0.4407,0.6678,0.0829,0.46035,0.47325,0.0408,11.2911,0.15825,2.5676,1.60125,0.0520,0.10755,0.1232" --enable_mcdropout True ## category balanced weights + attention
+# --enable_mcdropout True
+# --enable_resnet_dropout True --dropout_prob 0.5
+# --enable_mcdropout True
+# --use_trained True
+# --is_train True
+# --use_patching True
+# --class_weights "balanced,0.2938,0.4452,0.0829,0.3069,0.3155,0.0408,7.5274,0.1055,2.5676,1.0675,0.0520,0.0717,0.1232" #balanced
+# this is with attention --class_weights "balanced,0.4407,0.6678,0.0829,0.46035,0.47325,0.0408,11.2911,0.15825,2.5676,1.60125,0.0520,0.10755,0.1232"
+# --class_weights "0.9976,1.0198,0.9359,0.9999,1.0014,0.9045,1.2009,0.9470,1.1249,1.0696,0.9150,0.9293,0.9544" # other weighting
+# --models_names "resnet101 Unet" "resnet101 FPN" "mit_b3 Unet" ---- ['mit_b3 FPN']
+# --models_paths "/path/to/model1.pth" "/path/to/model2.pth" "/path/to/model3.pth"
+# --class_weights "0.1,0.5,0.4,.."

@@ -194,7 +194,7 @@ Storage space where the projects live. Can be a folder on local computer or can 
     To Contribute Back create a Pull Request. Go to GitHub -> Open your fork.-> Click "New Pull Request" -> Compare with the original repo with fork repo. basefork should be the upstream original repo  and base branch is upstream master. Head fork is your forked repo and compare branch is the master of your forked repo. After selection of repo and branches, submit the PR.The project maintainer will review and merge.
 - <git restore --staged file_name>
   To move a file from the Git staging area back to the unstaged changes, use the command . This command removes the specified file from the staging area, leaving it as an unstaged modification. Alternatively, to unstage all files, you can use
-  <git reset>
+  <git reset> or <git restore --staged>
 - <git reset --soft HEAD~1> To revert the last unpushed commit back to staging area
 - <git diff localbranch remotebranch>
     Compare the remote branch origin/main with your local branch main. Eg: <git diff main origin/main>
