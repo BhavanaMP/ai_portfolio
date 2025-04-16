@@ -226,6 +226,10 @@ Storage space where the projects live. Can be a folder on local computer or can 
   <git reset --hard origin/master>
   <git pull origin master>
   Warning: This removes local changes.
+- To push large files, we track files with git lfs and use normal git commands
+  <git lfs install> # if not installed already
+  <git lfs track "\*.h5">
+  <git add .gitattributes>
 
 - <git status>
   Gives the files tracking, history of modifications and stuff
