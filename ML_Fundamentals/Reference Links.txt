@@ -1,0 +1,83 @@
+Links:
+Maths, calculus(integration and differentiation), linear algreba, matrices, logarithms
+	https://www.mathsisfun.com/algebra/matrix-introduction.html
+	https://www.mathsisfun.com/algebra/matrix-inverse.html
+	https://mathinsight.org/logarithm_basics4
+	https://portal.tpu.ru/SHARED/k/KONVAL/Sites/English_sites/Site3_M/6/6_10.htm
+	https://youtu.be/7Gtxd-ew4lk?si=BSQqE4orSqzxSOZV - Matrices, vectors, orthogonal matrix, orthonormal vectors, symmetric matrix, singular matrix, eigen, svd, pca
+
+Image properties
+https://dev.to/sandeepbalachandran/machine-learning-going-furthur-with-cnn-part-2-41km
+https://www.geeksforgeeks.org/how-to-convert-images-to-numpy-array/?ref=lbp
+https://www.geeksforgeeks.org/how-to-convert-images-to-numpy-array/
+https://scikit-image.org/skimage-tutorials/lectures/00_images_are_arrays.html
+
+XGBoost
+https://towardsdatascience.com/https-medium-com-vishalmorde-xgboost-algorithm-long-she-may-rein-edd9f99be63d
+
+Deep Learning books and resources
+https://community.deeplearning.ai/t/deep-learning-bibliography/76
+http://karpathy.github.io/
+https://karpathy.ai/
+
+NN - 
+	https://cs231n.github.io/neural-networks-3/#anneal
+    https://github.com/dennybritz/nn-from-scratch
+    https://cs231n.github.io/neural-networks-case-study/
+	https://cs231n.github.io/
+	https://www.deeplearning.ai/ai-notes/initialization/index.html
+	https://www.deeplearning.ai/ai-notes/optimization/index.html  - object detection, closed form
+	https://medium.com/geekculture/how-to-deal-with-vanishing-and-exploding-gradients-in-neural-networks-24eb00c80e84
+	https://community.deeplearning.ai/t/symmetry-breaking-versus-zero-initialization/16061
+	https://replit.com/talk/ask/how-do-you-color-your-textprint/26895
+	https://towardsdatascience.com/gradient-descent-with-momentum-59420f626c8f
+	https://www.statisticshowto.com/probability-and-statistics/statistics-definitions/moving-average/
+	https://www.investopedia.com/terms/s/sma.asp
+	https://www.brokerxplorer.com/article/what-are-the-four-major-moving-averages-3824#:~:text=Moving%20Average%20has%20four%20main,cover%20technical%20matters%20in%20trading.
+	https://leimao.github.io/blog/Exponential-Moving-Average/
+	https://towardsdatascience.com/a-visual-explanation-of-gradient-descent-methods-momentum-adagrad-rmsprop-adam-f898b102325c
+	https://analyticsindiamag.com/how-to-use-learning-rate-annealing-with-neural-networks/
+	https://medium.com/konvergen/continuing-on-adaptive-method-adadelta-and-rmsprop-1ff2c6029133 - ada delta unit mismatch, hessian matrix
+	https://datascience.stackexchange.com/questions/116692/accuracy-vs-categorical-accuracy
+	
+	- CNN
+		https://towardsdatascience.com/object-localization-in-overfeat-5bb2f7328b62#:~:text=The%20difference%20between%20object%20localization,the%20objects%20and%20their%20boundaries.
+		https://cs.stackexchange.com/questions/96672/what-is-the-spatial-information-in-convolutional-neural-network#:~:text=Space%20represents%20the%202D%20plane,is%20spatial%20information%20in%20images.
+        https://www.quora.com/How-do-neural-networks-learn-spatial-hierarchies-in-data-especially-in-convolutional-architectures
+		https://www.pycodemates.com/2023/07/backward-pass-in-convolutional-neural-network-explained.html
+		https://stackoverflow.com/questions/47312219/what-is-the-definition-of-a-non-trainable-parameter
+		https://stackoverflow.com/questions/45799926/why-batch-normalization-over-channels-only-in-cnn
+		
+	- Graph Neural Networks 
+		https://distill.pub/2021/gnn-intro/
+		https://distill.pub/2021/understanding-gnns/ - cnn with gnn
+		https://www.datacamp.com/tutorial/comprehensive-introduction-graph-neural-networks-gnns-tutorial
+		https://neptune.ai/blog/graph-neural-network-and-some-of-gnn-applications
+		
+	- Speech Recognition
+		https://www.analyticsvidhya.com/blog/2021/01/introduction-to-automatic-speech-recognition-and-natural-language-processing/
+		https://medium.com/codex/speech-recognition-101-c739e0b40051
+	
+- Google cloud instead of Colab
+	https://github.com/cs231n/gcloud
+	https://youtu.be/F4tvM4Vb3A0?si=-a7zpKS_yuMTHRJe - practical deep learning for coders with images
+	
+- Data science interviews and data scientist 
+	https://www.andreaperlato.com/theorypost/
+	https://youtu.be/l_3zj6HeWUE?si=uJSv4jbGfOSWEezs - normalization BatchNorm, LayerNorm, InstanceNorm, GroupNorm
+
+- Microsoft Build Tools Installation
+https://www.pythondiscord.com/pages/tags/microsoft-build-tools/
+https://github.com/bycloudai/InstallVSBuildToolsWindows
+https://visualstudio.microsoft.com/downloads/
+https://www.meziantou.net/locating-msbuild-on-a-machine.htm
+"${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -version "[16.0,18.0)" -products *  -prerelease -latest -utf8 -format json
+
+- torch installation with cuda toolkit
+https://pytorch.org/get-started/locally/
+https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_network
+https://medium.com/@harunijaz/a-step-by-step-guide-to-installing-cuda-with-pytorch-in-conda-on-windows-verifying-via-console-9ba4cd5ccbef
+https://forums.developer.nvidia.com/t/cuda-toolkit-11-8-installation-failed-at-the-nsight-visual-studio-edition-windows-11/234434/4
+https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html#installdriver-windows
+https://discuss.pytorch.org/t/winerror-126-when-import-torch/80249/10
+
