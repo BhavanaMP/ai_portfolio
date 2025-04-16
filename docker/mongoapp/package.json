@@ -1,0 +1,17 @@
+{
+  "name": "mongoapp",
+  "version": "1.0.0",
+  "description": "simple java script application that connects to mongodb and get data dynamically from DB and displays in the browser. The Javascript application is containerized",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mongodb": "^6.15.0"
+  }
+}
