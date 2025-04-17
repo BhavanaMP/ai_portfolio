@@ -1,1 +1,3 @@
-this is my test file in ec2 server
+version https://git-lfs.github.com/spec/v1
+oid sha256:c42ae6b483e43a0a2b8d5b79de81e32223eca948ca892eaa7d741b743cea5b82
+size 35

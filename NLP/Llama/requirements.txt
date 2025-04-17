@@ -1,5 +1,3 @@
-torch
-tqdm
-sentencepiece
-torchmetrics
-numpy
+version https://git-lfs.github.com/spec/v1
+oid sha256:73dc946e883160a2eaaeef5cb62772e744582eb43fd9a6dd923cef5a7ac27c8e
+size 47

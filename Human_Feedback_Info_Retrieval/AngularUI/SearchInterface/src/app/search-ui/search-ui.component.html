@@ -1,0 +1,125 @@
+<mat-card>
+  <mat-card-content>
+    <mat-toolbar>
+      <mat-toolbar-row>
+        <span class="group">
+          <p>RunTimeTerror</p>
+          
+        </span>
+        <span class="title">
+           
+           <p>{{title}}</p>
+        </span>
+        <span class="fill-remaining-space"></span>
+        <div class="button">
+          <button mat-fab color="accent" color="primary"  (click)=logout()>
+            <mat-icon mat-icon>power_settings_new</mat-icon>
+          </button>
+        </div>
+        
+      </mat-toolbar-row>
+      
+    </mat-toolbar>
+    <div>
+      <h1 class="group">Welcome {{user}}!!</h1>
+    </div>
+  </mat-card-content>
+</mat-card>
+<div class="center">
+
+  <form [formGroup]="SearchForm">
+    
+    <mat-form-field appearance="outline" style="width:600px !important;" >
+            <mat-label>Search Here....</mat-label>
+            <input matInput placeholder="Type Something to explore!" name="query" formControlName="query" class="form-control" [(ngModel)]="query" required>
+            <mat-error *ngIf="SearchForm.controls.query.hasError('required')">
+              Please give query
+            </mat-error>
+            <mat-icon matSuffix (click)="_formSubmit()">search </mat-icon>
+            <mat-hint>Hint:Information need </mat-hint>
+    </mat-form-field>
+  </form>
+</div>
+<!--<mat-toolbar color="primary"  >
+    <mat-toolbar-row>
+     <span align="text-center">
+        <img class="logo" src="../assets/eatsmarticon.png"> 
+        <p>Information Retrieval System</p>
+     </span>
+    
+     
+   </mat-toolbar-row>
+   </mat-toolbar> -->
+<!-- <div>
+    
+        <h2 class="text-center">{{ title }}</h2>
+        <hr />
+        <form [formGroup]="myForm" (ngSubmit)="_formSubmit">-->
+            <!-- NAME FIELD -->
+          <!-- <div class="form-group">
+            <input type="text" formControlName="name" class="form-control" placeholder="Enter name" />
+            <div *ngIf="myForm.controls.name.invalid && myForm.controls.name.touched" class="text-danger">
+              <small *ngIf="myForm.controls.name.errors.required">Firstname is required.</small>
+              <small *ngIf="myForm.controls.name.errors.pattern">Only alphabets are allowed.</small>
+            </div> 
+          </div> -->
+          <!-- EMAIL ADDRESS FIELD -->
+          <!-- <div class="form-group">
+            <input type="text" formControlName="email" class="form-control" placeholder="Enter email" />
+             <div *ngIf="myForm.controls.email.invalid && myForm.controls.email.touched" class="text-danger">
+              <small *ngIf="myForm.controls.email.errors.required">Email address is required.</small>
+              <small *ngIf="myForm.controls.email.errors.email">Email must be a valid email address.</small>
+            </div>
+          </div> -->
+          <!-- PHONE FIELD -->
+          <!-- <div class="form-group">
+            <input type="text" formControlName="phone" class="form-control" placeholder="Enter phone" />
+            <div *ngIf="myForm.controls.phone.invalid && myForm.controls.phone.touched" class="text-danger">
+              <small *ngIf="myForm.controls.phone.errors.required">Phone number is required.</small>
+              <small *ngIf="myForm.controls.phone.errors.pattern">Phone number is not valid.</small>
+            </div>
+          </div>  -->
+          <!-- COUNTRY LIST DROPDOWN -->
+          <!-- <div class="form-group">
+            <select class="form-control" id="contry" formControlName="country">
+              <option value="-1" disabled>Select country</option>
+              <option *ngFor="let country of countries" [value]="country.name">{{country.name}}</option>
+            </select>
+          </div> -->
+          <!-- SUBMIT BUTTON -->
+          <!-- <div class="form-group">
+            <input type="submit" value="Submit" [disabled]="myForm.invalid" class="btn btn-success" />
+          </div>
+        </form>
+   
+        <div *ngIf="formData">
+          <strong>Form Value</strong>: {{formData |json}}
+        </div>
+      </div> -->
+   
+  
+
+    <!-- <mat-form-field >
+        
+      <mat-chip-list #chipList>
+         <mat-chip style="margin-top:0.4em;" *ngFor="let option of  this.dataService.searchOption" (removed)="removeOption(option)"> 
+            <mat-search-bar></mat-search-bar>
+            <input type="text" placeholder="Search">
+            <mat-chip>
+          <span>{{title}}</span>
+          
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip>
+        <input #autocompleteInput type="text" placeholder="Enter title" aria-label="Number" matInput [formControl]="myControl"
+          [matAutocomplete]="auto" [matChipInputFor]="chipList">
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+          <mat-option *ngFor="let option of autoCompleteList" [value]="option" (onSelectionChange)="filterPostList($event)">
+            {{option.title}}
+          </mat-option>
+        </mat-autocomplete> 
+      </mat-chip-list>
+    
+    </mat-form-field> -->
+    
+    
+     
