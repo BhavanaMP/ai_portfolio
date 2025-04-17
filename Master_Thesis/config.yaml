@@ -1,0 +1,141 @@
+# # Project related args
+architecture: FPN_MIT_B3              # Unet_Resnet101, FPN_MIT_B3, DLV3Plus_CONVNEXT_small
+type: Baseline                            # baseline, baseline_OHEM, mcdropout, mcdropout_OHEM, EDL, EDL_OHEM
+model_type: Baseline                     # MCD, EDL, Baseline , Baseline_Finetune, Baseline_OHEM_FINETUNE # needed for pred
+name: FPN_MIT_B3_Baseline          # architecture_type_model_type without 50_5, FPN_MIT_B3_Baseline_Finetune
+
+# # For reproducibility
+# seed: 1
+
+# # Pretrain
+# is_pretrain: True
+# pretrain_ckpt_save_loc: "./checkpoints_loss/pretrain_checkpoints"
+
+# # Training
+# # run_id will be generated automatically if not provided
+# is_train: True
+
+# # # # # # Common Args for Training and Pretraining
+# train_dataset_name: cityscapes
+# crop_size: 1024
+# ignore_index: 255
+# num_epochs: 50
+# batch_size: 3  # 4 # 3 usual # 28 for finetune only few
+# lr: 0.00001     # 0.00001 for baseline finetune  # 0.0001 usual  # 0.00001 used for EDL second run, used polylr there for 100 epochs - model_FPN_MIT_B3_EDL_cityscapes_7c580vc.pt
+# encoder: mit_b3
+# decoder: FPN
+
+# # Just for Training
+# # Fine Tine with baseline
+# is_finetune: True
+# pretrained_mdl_ckpt_path: "./checkpoints_loss/baseline_checkpoints/model_FPN_MIT_B3_baseline_cityscapes_t7z5h2i.pt"
+# # Resume
+# resume_training: False
+
+# # MCD
+# train_mcd: True
+# forward_passes: 5
+
+# # EDL
+# train_edl: True
+# use_uncertainty_in_edl: True
+
+# # Common
+# use_ohem: True
+
+# # Training checkpoints
+# baseline_ckpt_save_loc: "./checkpoints_miou/baseline_checkpoints"
+# mcd_ckpt_save_loc: "./checkpoints_miou/mcd_checkpoints"
+# edl_ckpt_save_loc: "./checkpoints_miou/edl_checkpoints"
+
+### -------------------------------------------------------- ###
+# # Test - Generates Test data
+# is_test_eval: True
+eval_model_type: "edl"         # "mcd" / "baseline" / "edl"  # needed for test_eval and prediction, it gets edl or normal classifier based on this
+# # # OOD
+# run_ood_inference: True           # Depends on eval_dataset_name, "lostandfound" / "fishyscapes" for OOD
+# # MCDropout Inference
+# run_mcdropout_inference: False       
+
+# # # Common for whole Test and also for prediction
+eval_dataset_name: "fishyscapes"       # "cityscapes" / "lostandfound" / "fishyscapes" # needed for test_eval, prediction, entropy dist, while calc_eval_metrics, not considered for OOD and AURRC, needed for ece and segmetrics
+model_path: "./checkpoints_loss/edl_checkpoints/model_FPN_MIT_B3_EDL_BASELINE_FINETUNE_cityscapes_q78bxo0.pt"  # checkpoint path to run inference on, needed for calc_eval_metrics and test_eval, also for plotting entropy dist
+
+# model_names:
+#   - mit_b3
+#   - FPN
+
+# # Calculate Evaluation Metrics Related Args
+calc_eval_metrics: True                        # for calculating metrics, also needed for plotting entropy distributions, relibaility plots
+
+# calc_seg_metrics: True
+# tests_save_dir: "./TestResults/FPN_MIT_B3_EDL_BASELINE_FINETUNE_cityscapes_q78bxo0/edl/Original"
+# calc_ece: True
+# ece_base_dir: "./TestResults/FPN_MIT_B3_EDL_BASELINE_FINETUNE_cityscapes_q78bxo0/edl/Original"
+# ece_bins: 10
+# calc_aurrc: True
+# aurrc_base_dir: "./TestResults/FPN_MIT_B3_baseline_cityscapes_t7z5h2i/baseline/Original"
+# aurrc_bins: 10
+
+calc_ood_metrics: True
+# ## ood_dir: "./TestResults/FPN_MIT_B3_EDL_OHEM_cityscapes_seq63hj/edl/OOD_lostandfound"  # only use this, when you have just one path, this plots only one auroc, chnage the folder as per given ood_name
+is_ood_multiple: True                                 # when you want to plot multiple plots in the same fig       
+multiple_ood_dirs:
+    # - path: "./TestResults/FPN_MIT_B3_EDL_UNC_BASELINE_FINETUNE_cityscapes_ypnor3k/edl/OOD_fishyscapes"
+    #   name: "EDL+UNC"
+    # - path: "./TestResults/FPN_MIT_B3_EDL_OHEM_BASELINE_FINETUNE_cityscapes_xbr8md4/edl/OOD_fishyscapes"
+    #   name: "EDL+OHEM"
+    # - path: "./TestResults/FPN_MIT_B3_MCD_OHEM_BASELINE_FINETUNE_cityscapes_7dpnjq2/mcd/OOD_fishyscapes"
+    #   name: "MCD+OHEM"
+    # - path: "./TestResults/FPN_MIT_B3_EDL_BASELINE_FINETUNE_cityscapes_q78bxo0/edl/OOD_lostandfound"
+    #   name: "EDL"
+    # - path: "./TestResults/FPN_MIT_B3_MCD_BASELINE_FINETUNE_cityscapes_qkcoxu0/mcd/OOD_lostandfound"
+    #   name: "MCD"
+    # - path: "./TestResults/FPN_MIT_B3_Baseline_OHEM_FINETUNE_cityscapes_8or5g4r/OOD_lostandfound"
+    #   name: "OHEM"
+    - path: "./TestResults/FPN_MIT_B3_baseline_cityscapes_t7z5h2i/baseline/OOD_lostandfound"
+      name: "Baseline"
+ood_name: "lostandfound"                               #"lostandfound" / "fishyscapes" # Needed for plotting entropy distirbutions too and calc_eval_metrics
+recall_level: 0.95
+
+# calc_misclassification: True
+# misclassification_dir: "./TestResults/FPN_MIT_B3_EDL_BASELINE_FINETUNE_cityscapes_q78bxo0/edl/Original"
+# misclassification_name: "cityscapes"                        #"lostandfound" / "fishyscapes"
+# misclass_recall_level: 0.95
+
+# plot_id_ood_distributions: True
+# baseline_ood_dir: "./TestResults/FPN_MIT_B3_Baseline_OHEM_cityscapes_ghjdevi/OOD_fishyscapes"
+# baseline_mdl_title: "OHEM"
+# improv_ood_dir: "./TestResults/FPN_MIT_B3_Baseline_OHEM_FINETUNE_cityscapes_8or5g4r/OOD_fishyscapes"
+# improv_mdl_title: "Finetuned OHEM"
+
+
+# # Prediction
+# is_predict: True
+# # # choose_random: False
+# plot_individual: True                    # for plotting the predictions as different individual pdfs, else they generate in a single png file
+# # selected_test_image: "frankfurt_000000_000576"    # "frankfurt_000001_028232", frankfurt_000001_028232 - cat, frankfurt_000000_021667 - cat original,, frankfurt_000001_031266
+# pred_img_path:
+#   - "./pred_images/lostandfound_35.png"         # ./pred_images/fishyscapes_cat.png , fishyscapes_dog.png, lostandfound_11.png, lostandfound_19.png, lostandfound_35.png
+#   - null                                        # null
+# run_mcd_for_preds: True
+# fig_title: "lostandfound_35"   # fishyscapes_cat , frankfurt_000000_012121, frankfurt_000000_013382, frankfurt_000000_000576, frankfurt_000001_014565
+
+
+
+
+# ------------- Checkpoint paths ------------------------
+# ./checkpoints_loss/baseline_checkpoints/model_FPN_MIT_B3_baseline_cityscapes_t7z5h2i.pt
+# ./checkpoints_miou/baseline_checkpoints/model_FPN_MIT_B3_Baseline_OHEM_cityscapes_ghjdevi.pt
+# ./checkpoints_miou/mcd_checkpoints/model_FPN_MIT_B3_MCD_cityscapes_esi8pdk.pt
+# ./checkpoints_miou/mcd_checkpoints/model_FPN_MIT_B3_MCD_OHEM_cityscapes_xv7tckd.pt
+# ./checkpoints_miou/edl_checkpoints/model_FPN_MIT_B3_EDL_cityscapes_rdbyxtv.pt
+# ./checkpoints_miou/edl_checkpoints/model_FPN_MIT_B3_EDL_OHEM_cityscapes_seq63hj.pt
+# ./checkpoints_miou/edl_checkpoints/model_FPN_MIT_B3_EDL_UNC_cityscapes_2wzq8un.pt
+
+# ./checkpoints_miou/baseline_checkpoints/model_FPN_MIT_B3_Baseline_OHEM_FINETUNE_cityscapes_8or5g4r.pt
+# ./checkpoints_miou/mcd_checkpoints/model_FPN_MIT_B3_MCD_BASELINE_FINETUNE_cityscapes_qkcoxu0.pt
+# ./checkpoints_miou/mcd_checkpoints/model_FPN_MIT_B3_MCD_OHEM_BASELINE_FINETUNE_cityscapes_7dpnjq2.pt
+# ./checkpoints_miou/edl_checkpoints/model_FPN_MIT_B3_EDL_BASELINE_FINETUNE_cityscapes_q78bxo0.pt
+# ./checkpoints_miou/edl_checkpoints/model_FPN_MIT_B3_EDL_UNC_BASELINE_FINETUNE_cityscapes_ypnor3k.pt
+# ./checkpoints_miou/edl_checkpoints/model_FPN_MIT_B3_EDL_OHEM_BASELINE_FINETUNE_cityscapes_xbr8md4.pt

@@ -1,0 +1,83 @@
+<mat-card>
+  <mat-card-content>
+    <mat-toolbar>
+      <mat-toolbar-row>
+        <span class="group">
+          <p>RunTimeTerror</p>
+          
+        </span>
+        <span class="title">
+           
+           <p>Information Retrieval System</p>
+        </span>
+        <span class="fill-remaining-space"></span>
+        <div class="button">
+          <button mat-fab color="accent" color="primary" (click)= "logout()">
+            <mat-icon mat-icon>power_settings_new</mat-icon>
+          </button>
+        </div>
+        
+      </mat-toolbar-row>
+      
+    </mat-toolbar>
+<div class="center">
+  <form>
+      <mat-form-field appearance="outline" style="width:600px !important;" >
+        <mat-label>Search Here....</mat-label>
+        <input matInput placeholder="Type Something to explore!" name="query" [(ngModel)]="query">
+          <mat-icon matSuffix (click)="searchService()">search </mat-icon>
+         
+        <!-- sentiment_very_satisfied -->
+       </mat-form-field>
+    </form>
+  </div>
+  <div style="position: relative;left: 70%;">
+  <button (click)="reRank()">Rerank</button>
+</div>
+  <div class="count">
+    Relevant documents retreived about {{results[0].totalHits}} results
+    <!-- get the relevant counts here -->
+  </div>
+  &nbsp;
+<div>
+    
+     <mat-grid-list cols = "5" rowHeight = "2:1">
+       <!-- <mat-grid-tile *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]"  [colspan] = "4" [rowspan] = "1"  > -->
+         <mat-grid-tile *ngFor="let i of results"  [colspan] = "4" [rowspan] = "1"  > 
+          <div class="container">
+             
+            <section class="header">
+             
+              <section class="header-start">
+                <!-- <img src={{i.imagepath}} alt="beer"> -->
+               </section>
+              
+            </section>
+      
+            <section class="footer">
+              <ngb-rating [max]="5" [(rate)]=i.ratings  [(ngModel)]="i.ratings"  (rateChange)="onRateChange($event,i.title)" [readonly]="false"  id={{i.ratings}}>
+               
+              </ngb-rating>
+                <p>Rate: {{i.ratings}}</p>
+            </section>
+      
+            <section class="body">
+              <div class="content">
+                <div class="box"><h1>{{i.title}}</h1></div>
+                <div class="box"><p>Original Rank: {{i.rank}}</p></div>
+                <div class="box"><p>Score: {{i.score}}</p></div>
+                
+                
+              </div>
+                
+               <div id="element1">  <a [href]="i.filepath" target="_blank" rel="search" referrerpolicy="unsafe-url">Text File Path</a> </div> 
+               <div id="element2">  <a [href]="i.imagepath" target="_blank" rel="search" referrerpolicy="unsafe-url">Image File Path</a> </div>
+              
+            </section>
+            
+            </div>
+          
+        </mat-grid-tile>
+      </mat-grid-list> 
+    </div>
+       

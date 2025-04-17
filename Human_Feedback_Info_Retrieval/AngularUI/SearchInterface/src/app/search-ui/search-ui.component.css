@@ -1,0 +1,38 @@
+.center{
+  position: absolute;
+  top: 40%;
+  left:30%;
+  margin-top: -50px;
+  margin-left: -50px;
+  width: 100px;
+  height: 100px;
+}​
+
+
+ .fill-remaining-space {
+  flex: 1 1 auto;
+}  
+.group{
+  font-family: fantasy;
+  font-style: inherit;
+}
+.title{
+  margin: 0 auto;
+  font-family: fantasy;
+  font-style: inherit;
+}
+
+/* ::ng-deep .mat-form-field-label-wrapper { top: -1.5em; } */
+::ng-deep.mat-form-field-appearance-outline.mat-form-field-outline {
+  color: rgb(51, 211, 219);
+}
+
+mat-icon {
+  cursor: pointer;
+}
+button{
+  background-color: transparent;
+}
+.mat-toolbar{
+  background-color: rgb(51, 211, 219);
+}
