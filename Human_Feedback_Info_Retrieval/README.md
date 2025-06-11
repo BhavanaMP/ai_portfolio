@@ -1,0 +1,1 @@
+Information Retrieval-based Web search engine with search index which shows a representative graphical image (i.e a thumbnail) from each topic that is listed in the results. Topics can be marked as interesting by the user and causes a re-ranking of the results if the user is searching for the same query or if he/she performs a new search
